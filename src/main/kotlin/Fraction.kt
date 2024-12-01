@@ -102,6 +102,8 @@ class Fraction {
     }
 
     // Math operations
+    fun abs() = this * sign()
+
     operator fun plus(other: Fraction): Fraction = Fraction(
         numerator = this.numerator * other.denominator + other.numerator * this.denominator,
         denominator = this.denominator * other.denominator,

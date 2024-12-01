@@ -5,14 +5,33 @@ import kotlin.math.min
 
 
 fun main(args: Array<String>) {
-    val file = File(
+    val matrixFile = File(
         args
-            .firstOrNull { it.startsWith("file=") }
-            ?.removePrefix("file=")
+            .firstOrNull { it.startsWith("matrix=") }
+            ?.removePrefix("matrix=")
             ?: "matrix.txt"
     )
-    val rows = runCatching { file.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }.getOrNull()
-        ?: error("Файл ${file.path} не найден")
+
+    val funFile = File(
+        args
+            .firstOrNull { it.startsWith("fun=") }
+            ?.removePrefix("fun=")
+            ?: "function.txt"
+    )
+
+    val fn = runCatching { funFile.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }
+        .getOrNull()
+        ?.firstOrNull()
+        ?: error("Файл ${funFile.path} не найден")
+
+    val f = fn.split(" ").mapNotNull { it.toFractionOrNull() }.toMutableList()
+
+    while (f.first() == Fraction(0)) {
+        f.removeFirst()
+    }
+
+    val rows = runCatching { matrixFile.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }.getOrNull()
+        ?: error("Файл ${matrixFile.path} не найден")
 
     val m = rows[0].split(" ")[0]
         .toIntOrNull()
@@ -45,8 +64,37 @@ fun main(args: Array<String>) {
         },
         basis = defaultBasis,
     )
-    println("\nMatrix:\n$matrix")
+    if (f.size - 1 != n) {
+        error("Функция должна быть степени n=$n")
+    }
+    println("Задача:")
+    println("${f.toStringFun()} -> min")
+    println(matrix)
     val straightRunning = matrix.inBasis(newBasis).straightRunning()
-    println("\nStraight running:\n$straightRunning")
-    println("\nReverse running:\n${straightRunning.reverseRunning()}")
+    println("\nПрямой ход:\n$straightRunning")
+    println("\nОбратный ход:\n${straightRunning.reverseRunning()}")
+}
+
+fun List<Fraction>.toStringFun(): String {
+    val n = this.size
+    var res = "${this[0]} * x${n-1}"
+    for (i in 1..n-2) {
+        if (this[i] != Fraction(0)) {
+            res += if (this[i] < 0) {
+                " - "
+            } else {
+                " + "
+            }
+            res += "${this[i].abs()} * x${n-i-1}"
+        }
+    }
+    if (this[0] != Fraction(0)) {
+        res += if (this[0] < 0) {
+            " - "
+        } else {
+            " + "
+        }
+        res += "${this[n-1]}"
+    }
+    return res
 }
