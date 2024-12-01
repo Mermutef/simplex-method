@@ -48,7 +48,6 @@ data class Matrix(
         }
         for (i in 0..<m) {
             for (j in 0..<n) {
-                println("i=$i j=$j c=${coefficients[i][j]} nj=${coefficientsIndices[j]}")
                 coefficients[i][j] = coefficients[i][coefficientsIndices[j]]
             }
         }
@@ -62,7 +61,6 @@ data class Matrix(
     }
 
     fun straightRunning(): Matrix {
-        var resultMatrix = arrayOf<Array<Fraction>>()
         val coefficients = this.coefficients.clone()
         coefficients.sortBy { it.countLeadZeros() }
         for (i in 0..<m) {
@@ -74,18 +72,16 @@ data class Matrix(
                         (coefficients[j] - (coefficients[i] * coefficients[j][i]))
                 }
             }
-            resultMatrix += coefficients[i]
         }
         return Matrix(
             n = n,
             m = m,
-            coefficients = resultMatrix,
+            coefficients = coefficients,
             basis = basis,
         )
     }
 
     fun reverseRunning(): Matrix {
-        var resultMatrix = arrayOf<Array<Fraction>>()
         val coefficients = this.coefficients.clone()
         for (i in m - 1 downTo 0) {
             if (!coefficients[i][i].equals(0)) {
@@ -95,12 +91,11 @@ data class Matrix(
                         (coefficients[j] - (coefficients[i] * coefficients[j][i]))
                 }
             }
-            resultMatrix += coefficients[i]
         }
         return Matrix(
             n = n,
             m = m,
-            coefficients = resultMatrix,
+            coefficients = coefficients,
             basis = basis,
         )
     }
