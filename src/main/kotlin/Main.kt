@@ -64,8 +64,8 @@ fun main(args: Array<String>) {
         },
         basis = defaultBasis,
     )
-    if (f.size - 1 != n) {
-        error("Функция должна быть степени n=$n")
+    if (f.size - 1 > n) {
+        error("Матрица ограничений неполна. Размерность задачи n=${f.size - 1}, размерность ограничений n=$n")
     }
     println("Задача:")
     println("${f.toStringFun()} -> min")
@@ -77,24 +77,38 @@ fun main(args: Array<String>) {
 
 fun List<Fraction>.toStringFun(): String {
     val n = this.size
-    var res = "${this[0]} * x${n-1}"
-    for (i in 1..n-2) {
-        if (this[i] != Fraction(0)) {
-            res += if (this[i] < 0) {
-                " - "
-            } else {
-                " + "
-            }
-            res += "${this[i].abs()} * x${n-i-1}"
+    var res = "${this[0]}x1 "
+    for (i in 1..<n - 1) {
+        res += when {
+            this[i] > 0 -> "+ ${this[i]}x${i + 1} "
+            this[i] < 0 -> "- ${-this[i]}x${i + 1} "
+            else -> ""
         }
     }
-    if (this[0] != Fraction(0)) {
-        res += if (this[0] < 0) {
-            " - "
-        } else {
-            " + "
-        }
-        res += "${this[n-1]}"
+    res += when {
+        this[n-1] > 0 -> "+ ${this[n-1]} "
+        this[n-1] < 0 -> "- ${-this[n-1]} "
+        else -> ""
     }
+
+//    var res = "${this[0]} * x${n - 1}"
+//    for (i in 1..n - 2) {
+//        if (this[i] != Fraction(0)) {
+//            res += if (this[i] < 0) {
+//                " - "
+//            } else {
+//                " + "
+//            }
+//            res += "${this[i].abs()} * x${n - i - 1}"
+//        }
+//    }
+//    if (this[0] != Fraction(0)) {
+//        res += if (this[0] < 0) {
+//            " - "
+//        } else {
+//            " + "
+//        }
+//        res += "${this[n - 1]}"
+//    }
     return res
 }
