@@ -24,11 +24,7 @@ fun main(args: Array<String>) {
         ?.firstOrNull()
         ?: error("Файл ${funFile.path} не найден")
 
-    val f = fn.split(" ").mapNotNull { it.toFractionOrNull() }.toMutableList()
-
-    while (f.first() == Fraction(0)) {
-        f.removeFirst()
-    }
+    val coffs = fn.split(" ").mapNotNull { it.toFractionOrNull() }.toMutableList()
 
     val rows = runCatching { matrixFile.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }.getOrNull()
         ?: error("Файл ${matrixFile.path} не найден")
@@ -44,7 +40,9 @@ fun main(args: Array<String>) {
         ?: error("Число строк должно быть натуральным числом, не меньшим m=$m")
 
     val newBasis = rows[1].split(" ")
-        .map { it.toIntOrNull() ?: error("Индексы базисных переменных должны быть целыми числами") }
+        .map {
+            it.toIntOrNull()?.let { idx -> idx - 1 } ?: error("Индексы базисных переменных должны быть целыми числами")
+        }
         .distinct()
 
     val defaultBasis = mutableListOf<Int>()
@@ -64,51 +62,12 @@ fun main(args: Array<String>) {
         },
         basis = defaultBasis,
     )
-    if (f.size - 1 > n) {
-        error("Матрица ограничений неполна. Размерность задачи n=${f.size - 1}, размерность ограничений n=$n")
-    }
-    println("Задача:")
-    println("${f.toStringFun()} -> min")
+    val f = Function(coffs, n)
+    println("Задача:\n$f")
     println(matrix)
     val straightRunning = matrix.inBasis(newBasis).straightRunning()
     println("\nПрямой ход:\n$straightRunning")
-    println("\nОбратный ход:\n${straightRunning.reverseRunning()}")
-}
-
-fun List<Fraction>.toStringFun(): String {
-    val n = this.size
-    var res = "${this[0]}x1 "
-    for (i in 1..<n - 1) {
-        res += when {
-            this[i] > 0 -> "+ ${this[i]}x${i + 1} "
-            this[i] < 0 -> "- ${-this[i]}x${i + 1} "
-            else -> ""
-        }
-    }
-    res += when {
-        this[n-1] > 0 -> "+ ${this[n-1]} "
-        this[n-1] < 0 -> "- ${-this[n-1]} "
-        else -> ""
-    }
-
-//    var res = "${this[0]} * x${n - 1}"
-//    for (i in 1..n - 2) {
-//        if (this[i] != Fraction(0)) {
-//            res += if (this[i] < 0) {
-//                " - "
-//            } else {
-//                " + "
-//            }
-//            res += "${this[i].abs()} * x${n - i - 1}"
-//        }
-//    }
-//    if (this[0] != Fraction(0)) {
-//        res += if (this[0] < 0) {
-//            " - "
-//        } else {
-//            " + "
-//        }
-//        res += "${this[n - 1]}"
-//    }
-    return res
+    val reverseRunning = straightRunning.reverseRunning()
+    println("\nОбратный ход:\n${reverseRunning}")
+    println("\nЗадача после подстановки нового базиса:\n${f.inBasis(reverseRunning)}")
 }

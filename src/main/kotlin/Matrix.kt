@@ -39,23 +39,20 @@ data class Matrix(
     fun inBasis(
         newBasis: List<Int>,
     ): Matrix {
-        val coefs = coefficients.clone()
-        val coefficientsIndices = newBasis.toMutableList()
-        for (i in 0..<n) {
-            if (i !in coefficientsIndices) {
-                coefficientsIndices.add(i)
-            }
-        }
+        val newCoefficients = mutableListOf<MutableList<Fraction>>()
+        val coefficientsIndices = newBasis + (0..<n).filter { it !in newBasis }
         for (i in 0..<m) {
+            val row = mutableListOf<Fraction>()
             for (j in 0..<n) {
-                coefficients[i][j] = coefficients[i][coefficientsIndices[j]]
+                row.add(coefficients[i][coefficientsIndices[j]])
             }
+            newCoefficients.add(row)
         }
 
         return Matrix(
             n = n,
             m = m,
-            coefficients = coefs,
+            coefficients = newCoefficients,
             basis = newBasis,
         )
     }
