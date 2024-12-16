@@ -39,7 +39,7 @@ class Function(val coefficients: List<Fraction>, n: Int) {
     }
 
     fun inBasis(matrix: Matrix): Function {
-        val allIndices = matrix.basis + (0..<matrix.n).filter { it !in matrix.basis }
+        val allIndices = matrix.fullIndices
         val newCoefficients = mutableListOf<Fraction>()
         for (i in 0..<matrix.n - 1) {
             if (i !in matrix.basis) {
@@ -54,5 +54,13 @@ class Function(val coefficients: List<Fraction>, n: Int) {
             rowK[allIndices.indexOf(matrix.n - 1)] * coefficients[matrix.basis[k]]
         }.reduce(Fraction::plus))
         return Function(newCoefficients, matrix.n)
+    }
+
+    fun fullFunctionCoefficients(fullIndices: List<Int>): List<Fraction> {
+        val tmp = mutableListOf<Fraction>()
+        for (i in fullIndices) {
+            tmp.add(coefficients[i])
+        }
+        return tmp
     }
 }

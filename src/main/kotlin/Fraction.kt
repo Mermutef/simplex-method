@@ -4,7 +4,7 @@ import java.math.BigInteger
 import kotlin.math.abs
 import kotlin.math.min
 
-class Fraction {
+class Fraction : Comparable<Fraction> {
     val numerator: Long
     val denominator: Long
 
@@ -50,7 +50,7 @@ class Fraction {
     }
 
     // Comparison
-    override operator fun equals(other: Any?): Boolean =
+    override fun equals(other: Any?): Boolean =
         when (other) {
             is Fraction -> this.shorten().compareTo(other.shorten()) == 0
 
@@ -61,7 +61,7 @@ class Fraction {
             else -> false
         }
 
-    operator fun compareTo(other: Fraction): Int {
+    override operator fun compareTo(other: Fraction): Int {
         val shortenA = this.shorten()
         val shortenB = other.shorten()
         return (shortenA - shortenB).sign()

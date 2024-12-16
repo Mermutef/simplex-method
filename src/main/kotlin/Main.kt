@@ -1,7 +1,6 @@
 package ru.yarsu
 
 import java.io.File
-import kotlin.math.min
 
 
 fun main(args: Array<String>) {
@@ -66,6 +65,19 @@ fun main(args: Array<String>) {
     println("\nПрямой ход:\n$straightRunning")
     val reverseRunning = straightRunning.reverseRunning()
     println("\nОбратный ход:\n${reverseRunning}")
-    println("\nЗадача после подстановки нового базиса:\n${f.inBasis(reverseRunning)}")
-    println(SimplexStep(reverseRunning, f)(0, 3).matrix)
+    val newF = f.inBasis(reverseRunning)
+    println("\nЗадача после подстановки нового базиса:\n${newF}")
+    val simplexTables = mutableListOf<SimplexStep>()
+    simplexTables.add(SimplexStep(matrix = reverseRunning, function = newF))
+    println()
+    while (true) {
+        println(simplexTables.last())
+        println()
+        val possibleValues = simplexTables.last().possibleReplaces() ?: break
+        val s = possibleValues.second
+        val r = possibleValues.third
+        println("s=${s + 1} r=${r + 1}")
+        simplexTables.add(simplexTables.last()(s = s, r = r))
+    }
+    println(simplexTables.last())
 }

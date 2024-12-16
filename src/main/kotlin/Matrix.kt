@@ -135,10 +135,10 @@ operator fun Array<Fraction>.div(coff: Fraction): Array<Fraction> = this.map { i
 operator fun Array<Fraction>.minus(other: Array<Fraction>): Array<Fraction> =
     this.zip(other).map { (a, b) -> a - b }.toTypedArray()
 
-fun List<Int>.swap(i: Int, j: Int): List<Int> {
+fun <T> List<T>.swap(i: Int, j: Int): List<T> {
     val iItem = this[i]
     val jItem = this[j]
-    val newList = mutableListOf<Int>()
+    val newList = mutableListOf<T>()
     newList.addAll(this)
     newList[i] = jItem
     newList[j] = iItem
