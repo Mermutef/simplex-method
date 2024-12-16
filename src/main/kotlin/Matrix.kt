@@ -99,8 +99,10 @@ data class Matrix(
 
     override fun toString(): String {
         val maxColLength = coefficients.flatten().maxBy { it.toString().length }.toString().length
-        return coefficients.joinToString("\n") {
-            it.joinToString("  ") { x -> "${" ".repeat(maxColLength - "$x".length)}$x" }
+        return (listOf((basis + (0..<n).filter { it !in basis }).map { basisIdx ->
+            if (basisIdx + 1 != n) "x${basisIdx + 1}" else "b"
+        }) + coefficients.map { row -> row.map { coff -> coff.toString() } }).joinToString("\n") {
+            it.joinToString("  ") { x -> "${" ".repeat(maxColLength - x.length)}$x" }
         }
     }
 
