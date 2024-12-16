@@ -45,11 +45,6 @@ fun main(args: Array<String>) {
         }
         .distinct()
 
-    val defaultBasis = mutableListOf<Int>()
-    for (i in 0 until m) {
-        defaultBasis.add(i)
-    }
-
     val matrix = Matrix(
         n = n,
         m = m,
@@ -60,14 +55,17 @@ fun main(args: Array<String>) {
                         ?: error("Дробь должна выглядеть как '8/-15' и иметь знаменатель отличный от нуля")
                 }
         },
-        basis = defaultBasis,
+        basis = (0..<m).toList(),
+        free = (m..<n - 1).toList(),
     )
     val f = Function(coffs, n)
     println("Задача:\n$f")
     println(matrix)
-    val straightRunning = matrix.inBasis(newBasis).straightRunning()
+    val straightRunning =
+        matrix.inBasis(newBasis = newBasis, newFree = (0..<n - 1).filter { it !in newBasis }).straightRunning()
     println("\nПрямой ход:\n$straightRunning")
     val reverseRunning = straightRunning.reverseRunning()
     println("\nОбратный ход:\n${reverseRunning}")
     println("\nЗадача после подстановки нового базиса:\n${f.inBasis(reverseRunning)}")
+    println(SimplexStep(reverseRunning, f)(0, 3).matrix)
 }
