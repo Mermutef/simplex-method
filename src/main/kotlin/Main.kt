@@ -65,10 +65,9 @@ fun main(args: Array<String>) {
     println("\nПрямой ход:\n$straightRunning")
     val reverseRunning = straightRunning.reverseRunning()
     println("\nОбратный ход:\n${reverseRunning}")
-    val newF = f.inBasis(reverseRunning)
-    println("\nЗадача после подстановки нового базиса:\n${newF}")
+    println("\nЗадача после подстановки нового базиса:\n${f.inBasis(reverseRunning)}")
     val simplexTables = mutableListOf<SimplexStep>()
-    simplexTables.add(SimplexStep(matrix = reverseRunning, function = newF))
+    simplexTables.add(SimplexStep(matrix = reverseRunning, function = f))
     println()
     while (true) {
         println(simplexTables.last())
@@ -76,8 +75,9 @@ fun main(args: Array<String>) {
         val possibleValues = simplexTables.last().possibleReplaces() ?: break
         val s = possibleValues.second
         val r = possibleValues.third
-        println("s=${s + 1} r=${r + 1}")
+        println("s=${s} r=${r}")
         simplexTables.add(simplexTables.last()(s = s, r = r))
     }
-    println(simplexTables.last())
+    println("Искомое значение f* = ${-simplexTables.last().function.inBasis(simplexTables.last().matrix).coefficients.last()}")
+    println("Искомый x* = ${simplexTables.last().solution}")
 }
