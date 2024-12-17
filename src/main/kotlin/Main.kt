@@ -4,6 +4,7 @@ import ru.yarsu.entities.Fraction.Companion.toFractionOrNull
 import ru.yarsu.entities.Function
 import ru.yarsu.entities.Matrix
 import ru.yarsu.simplex.SimplexTable
+import ru.yarsu.simplex.SyntheticBasis
 import java.io.File
 
 
@@ -102,4 +103,21 @@ fun main(args: Array<String>) {
     val lastStep = simplexTables.last()
     println("\nМинимальное значение f* = ${lastStep.functionValue}")
     println("Достигается в точке x* = ${lastStep.vertex}")
+
+    println()
+    val simplexTables2 = mutableListOf<SimplexTable>()
+    simplexTables2.add(SyntheticBasis(matrix = matrix, function = f)())
+    println("\nНачальная симплекс-таблица искусственного базиса:\n${simplexTables2.last()}")
+    while (true) {
+        val possibleValues = simplexTables2.last().possibleReplaces()?.first() ?: break
+        val s = possibleValues.first
+        val r = possibleValues.second
+        println("\nШаг ${simplexTables2.size}")
+        println("Вводим в базис x${s + 1}, выводим x${r + 1}")
+        simplexTables2.add(simplexTables2.last()(s = s, r = r))
+        println("Результат шага:\n${simplexTables2.last()}")
+    }
+    val lastStep2 = simplexTables2.last()
+    println("\nМинимальное значение f* = ${lastStep2.functionValue}")
+    println("Достигается в точке x* = ${lastStep2.vertex}")
 }
