@@ -1,4 +1,4 @@
-package ru.yarsu.methods
+package ru.yarsu.simplex
 
 import ru.yarsu.entities.Fraction
 import ru.yarsu.entities.Function

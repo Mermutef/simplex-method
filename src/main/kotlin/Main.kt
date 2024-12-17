@@ -3,7 +3,7 @@ package ru.yarsu
 import ru.yarsu.entities.Fraction.Companion.toFractionOrNull
 import ru.yarsu.entities.Function
 import ru.yarsu.entities.Matrix
-import ru.yarsu.methods.SimplexTable
+import ru.yarsu.simplex.SimplexTable
 import java.io.File
 
 
@@ -72,7 +72,7 @@ fun main(args: Array<String>) {
         free = (m..<n - 1).toList(),
     )
     // создание функции
-    val f = Function(coffs, n)
+    val f = Function(coffs)
 
     // временный вывод
     println("Задача:\n$f")
