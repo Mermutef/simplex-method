@@ -1,13 +1,6 @@
 package ru.yarsu.entities
 
-class Function(val coefficients: List<Fraction>, n: Int) {
-    // проверка при инициализации
-    init {
-        require(coefficients.size == n) {
-            error("Матрица ограничений неполна. Размерность задачи n=${coefficients.size}, размерность ограничений n=$n")
-        }
-    }
-
+class Function(val coefficients: List<Fraction>) {
     /**
      * Выполняет подстановку выражений базисных переменных через свободные матрицы ограничений
      *
@@ -30,7 +23,7 @@ class Function(val coefficients: List<Fraction>, n: Int) {
         newCoefficients.add(coefficients[matrix.n - 1] + matrix.coefficients.mapIndexed { k, rowK ->
             rowK[allIndices.indexOf(matrix.n - 1)] * coefficients[matrix.basis[k]]
         }.reduce(Fraction::plus))
-        return Function(newCoefficients, matrix.n)
+        return Function(newCoefficients)
     }
 
     override fun toString(): String {
