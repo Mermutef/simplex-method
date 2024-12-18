@@ -11,14 +11,14 @@ data class Matrix(
     /**
      * Индекс столбца свободного члена
      */
-    val constantIdx: Int
+    val bIdx: Int
         get() = n - 1
 
     /**
      * Список индексов переменных (базисные + свободные + свободный член)
      */
     val fullIndices: List<Int>
-        get() = basis + free + listOf(constantIdx)
+        get() = basis + free + listOf(bIdx)
 
     // второй конструктор, чтобы каждый раз не мучиться с переводом MutableList к Array
     constructor(
@@ -68,6 +68,8 @@ data class Matrix(
         operator fun Array<Fraction>.div(coff: Fraction): Array<Fraction> = this.map { it / coff }.toTypedArray()
         operator fun Array<Fraction>.minus(other: Array<Fraction>): Array<Fraction> =
             this.zip(other).map { (a, b) -> a - b }.toTypedArray()
+        operator fun Array<Fraction>.plus(other: Array<Fraction>): Array<Fraction> =
+            this.zip(other).map { (a, b) -> a + b }.toTypedArray()
 
         /**
          * Смена двух значений списка местами.
@@ -106,10 +108,13 @@ data class Matrix(
         newFree: List<Int>,
     ): Matrix {
         val newCoefficients = mutableListOf<MutableList<Fraction>>()
-        val coefficientsIndices = newBasis + newFree + listOf(constantIdx)
+        val coefficientsIndices = newBasis + newFree + listOf(bIdx)
         coefficients.forEachIndexed { rowIdx, _ ->
             val rowInAnotherBasis = mutableListOf<Fraction>()
-            fullIndices.forEach { rowInAnotherBasis.add(coefficients[rowIdx][coefficientsIndices.indexOf(it)]) }
+            coefficientsIndices.forEach {
+                val t = fullIndices.indexOf(it)
+                rowInAnotherBasis.add(coefficients[rowIdx][t])
+            }
             newCoefficients.add(rowInAnotherBasis)
         }
 

@@ -54,7 +54,7 @@ fun main(args: Array<String>) {
     // базис, в котором будет происходить поиск решения
     val newBasis = rows[1].split(" ")
         .map {
-            it.toIntOrNull()?.let { idx -> idx - 1 } ?: error("Индексы базисных переменных должны быть целыми числами")
+            it.toIntOrNull() ?: error("Индексы базисных переменных должны быть целыми числами")
         }
         .distinct()
 
@@ -77,18 +77,19 @@ fun main(args: Array<String>) {
 
     // временный вывод
     println("Задача:\n$f")
-    println(matrix)
-    // прямой ход Гаусса
-    val straightRunning =
-        matrix.inBasis(newBasis = newBasis, newFree = (0..<n - 1).filter { it !in newBasis }).straightRunning()
-    println("\nПрямой ход:\n$straightRunning")
-    // обратный ход Гаусса
-    val reverseRunning = straightRunning.reverseRunning()
-    println("\nОбратный ход:\n${reverseRunning}")
+    println(matrix.inBasis(newBasis, (0..<n - 1).filter { it !in newBasis }))
     // временное хранилище шагов симплекс-метода
     val simplexTables = mutableListOf<SimplexTable>()
     // создание нулевого шага симплекс-метода
-    simplexTables.add(SimplexTable(matrix = reverseRunning, function = f))
+    simplexTables.add(
+        SimplexTable(
+            matrix = matrix
+                .inBasis(newBasis = newBasis, newFree = (0..<n - 1).filter { it !in newBasis })
+                .straightRunning()
+                .reverseRunning(),
+            function = f,
+        )
+    )
     println("\nНачальная симплекс-таблица:\n${simplexTables.last()}")
     // пока можем сделать шаг симплекс метода
     while (true) {

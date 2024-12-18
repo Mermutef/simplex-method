@@ -9,30 +9,32 @@ class SyntheticBasis(
     val function: Function,
 ) {
     operator fun invoke(): SimplexTable {
-        val syntheticFunction = function.coefficients.map { Fraction(0) }.toMutableList()
-        syntheticFunction.removeLast()
         val syntheticBasis = mutableListOf<Int>()
-        val eMatrix = mutableListOf<MutableList<Fraction>>()
+        val syntheticFree = matrix.basis + matrix.free
+
+        val extendedFunctionCoefficients = function.coefficients.map { Fraction(0) }.toMutableList()
+        extendedFunctionCoefficients.removeLast()
+        val extendedMatrixCoefficients = mutableListOf<MutableList<Fraction>>()
         matrix.basis.forEachIndexed { i, _ ->
-            syntheticFunction.addLast(Fraction(1))
+            extendedFunctionCoefficients.addLast(Fraction(1))
             syntheticBasis.add(matrix.n + i - 1)
             val newRow = mutableListOf<Fraction>()
             matrix.basis.forEachIndexed { j, _ ->
                 newRow.add(if (i == j) Fraction(1) else Fraction(0))
             }
-            eMatrix.add((newRow + matrix.coefficients[i]).toMutableList())
+            extendedMatrixCoefficients.add((newRow + matrix.coefficients[i]).toMutableList())
         }
-        syntheticFunction.addLast(Fraction(0))
-        val syntheticFree = matrix.basis + matrix.free
+        extendedFunctionCoefficients.addLast(Fraction(0))
+
         return SimplexTable(
             matrix = Matrix(
-                coefficients = eMatrix,
+                coefficients = extendedMatrixCoefficients,
                 n = matrix.n + matrix.m,
                 m = matrix.m,
                 basis = syntheticBasis,
                 free = syntheticFree,
             ),
-            function = Function(coefficients = syntheticFunction),
+            function = Function(coefficients = extendedFunctionCoefficients),
         )
     }
 }

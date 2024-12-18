@@ -1,6 +1,11 @@
 package ru.yarsu.entities
 
-class Function(val coefficients: List<Fraction>) {
+import ru.yarsu.entities.Matrix.Companion.times
+import ru.yarsu.entities.Matrix.Companion.plus
+
+class Function(
+    val coefficients: List<Fraction>,
+) {
     /**
      * Выполняет подстановку выражений базисных переменных через свободные матрицы ограничений
      *
@@ -8,21 +13,18 @@ class Function(val coefficients: List<Fraction>) {
      *
      * @return функция с коэффициентами, выраженными через свободные переменные матрицы
      */
-    fun inBasis(matrix: Matrix): Function {
-        val allIndices = matrix.fullIndices
+    fun inBasisOf(matrix: Matrix): Function {
         val newCoefficients = mutableListOf<Fraction>()
-        for (i in 0..<matrix.n - 1) {
-            if (i !in matrix.basis) {
-                newCoefficients.add(coefficients[i] + matrix.coefficients.mapIndexed { k, rowK ->
-                    -rowK[allIndices.indexOf(i)] * coefficients[matrix.basis[k]]
-                }.reduce(Fraction::plus))
-            } else {
-                newCoefficients.add(Fraction(0))
+        coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction(0)) }
+        matrix.coefficients.mapIndexed { rowIdx, row -> row * coefficients[matrix.basis[rowIdx]] }
+            .reduce { row1, row2 -> row1 + row2 }
+            .forEachIndexed { idx, pi ->
+                when (val xi = (matrix.fullIndices[idx])) {
+                    in matrix.free -> newCoefficients[xi] = coefficients[xi] - pi
+                    in listOf(matrix.bIdx) -> newCoefficients += coefficients[xi] + pi
+                    else -> {}
+                }
             }
-        }
-        newCoefficients.add(coefficients[matrix.n - 1] + matrix.coefficients.mapIndexed { k, rowK ->
-            rowK[allIndices.indexOf(matrix.n - 1)] * coefficients[matrix.basis[k]]
-        }.reduce(Fraction::plus))
         return Function(newCoefficients)
     }
 

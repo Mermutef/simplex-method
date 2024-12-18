@@ -17,7 +17,7 @@ class SimplexTable(
             val values = mutableListOf<Pair<Int, Fraction>>()
             for (i in matrix.basis) {
                 val iIdx = matrix.basis.indexOf(i)
-                values.add(Pair(i, matrix.coefficients[iIdx][matrix.constantIdx]))
+                values.add(Pair(i, matrix.coefficients[iIdx][matrix.bIdx]))
             }
             for (i in matrix.free) {
                 values.add(Pair(i, Fraction(0)))
@@ -30,7 +30,7 @@ class SimplexTable(
      * Значение функции в текущей вершине
      */
     val functionValue: Fraction
-        get() = -function.inBasis(matrix).coefficients.last()
+        get() = -function.inBasisOf(matrix).coefficients.last()
 
     /**
      * Очередной шаг симплекс-метода
@@ -64,19 +64,24 @@ class SimplexTable(
      *
      * @return непустой список координат возможных опорных элементов, null иначе
      */
-    fun possibleReplaces(): List<Pair<Int, Int>>? {
-        val functionInBasis = function.inBasis(matrix)
+    fun possibleReplaces(forIdleRunning: Boolean = false): List<Pair<Int, Int>>? {
+        if (forIdleRunning) return idleRunningReplaces()
+
+        val functionInBasis = function.inBasisOf(matrix)
+
         val possibleS = matrix.free.filter { idx ->
             functionInBasis.coefficients[idx] < 0
         }
         val fractions = mutableListOf<Triple<Fraction, Int, Int>>()
+
         for (s in possibleS) {
+            val sIdx = matrix.fullIndices.indexOf(s)
             for (r in matrix.basis) {
-                if (matrix.coefficients[matrix.fullIndices.indexOf(r)][matrix.fullIndices.indexOf(s)] > 0) {
+                val rIdx = matrix.fullIndices.indexOf(r)
+                if (matrix.coefficients[rIdx][sIdx] > 0) {
                     fractions.add(
                         Triple(
-                            matrix.coefficients[matrix.fullIndices.indexOf(r)][matrix.n - 1] /
-                                    matrix.coefficients[matrix.fullIndices.indexOf(r)][matrix.fullIndices.indexOf(s)],
+                            matrix.coefficients[rIdx][matrix.bIdx] / matrix.coefficients[rIdx][sIdx],
                             s,
                             r,
                         )
@@ -92,8 +97,28 @@ class SimplexTable(
             ?.takeIf { it.isNotEmpty() }
     }
 
+    private fun idleRunningReplaces(): List<Pair<Int, Int>>? {
+        val functionInBasis = function.inBasisOf(matrix)
+
+        val possibleS = matrix.free.filter { functionInBasis.coefficients[it] == Fraction(0) }
+
+        for (s in possibleS) {
+            val sIdx = matrix.fullIndices.indexOf(s)
+            for (r in matrix.basis) {
+                val rIdx = matrix.fullIndices.indexOf(r)
+                if (matrix.coefficients[rIdx][sIdx] != Fraction(0) &&
+                    matrix.coefficients[rIdx][matrix.bIdx] == Fraction(0)
+                ) {
+                    return listOf(Pair(s, r))
+                }
+            }
+        }
+
+        return null
+    }
+
     override fun toString(): String {
-        return "${function.inBasis(matrix)}\n$matrix"
+        return "${function.inBasisOf(matrix)}\n$matrix"
     }
 }
 
