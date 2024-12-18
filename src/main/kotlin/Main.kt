@@ -94,11 +94,9 @@ fun main(args: Array<String>) {
     // пока можем сделать шаг симплекс метода
     while (true) {
         val possibleValues = simplexTables.last().possibleReplaces()?.first() ?: break
-        val s = possibleValues.first
-        val r = possibleValues.second
         println("\nШаг ${simplexTables.size}")
-        println("Вводим в базис x${s + 1}, выводим x${r + 1}")
-        simplexTables.add(simplexTables.last()(s = s, r = r))
+        println("Вводим в базис x${possibleValues.first + 1}, выводим x${possibleValues.second + 1}")
+        simplexTables.add(simplexTables.last() changeBasisBy possibleValues)
         println("Результат шага:\n${simplexTables.last()}")
     }
     val lastStep = simplexTables.last()
@@ -107,7 +105,8 @@ fun main(args: Array<String>) {
 
     println()
     val simplexTables2 = mutableListOf<SimplexTable>()
-    simplexTables2.add(SyntheticBasis(matrix = matrix, function = f)())
+    val sb = SyntheticBasis(matrix = matrix, function = f)
+    simplexTables2.add(sb.startTable)
     println("\nНачальная симплекс-таблица искусственного базиса:\n${simplexTables2.last()}")
     while (true) {
         val possibleValues = simplexTables2.last().possibleReplaces()?.first() ?: break
@@ -115,10 +114,27 @@ fun main(args: Array<String>) {
         val r = possibleValues.second
         println("\nШаг ${simplexTables2.size}")
         println("Вводим в базис x${s + 1}, выводим x${r + 1}")
-        simplexTables2.add(simplexTables2.last()(s = s, r = r))
+        simplexTables2.add(simplexTables2.last() changeBasisBy possibleValues)
         println("Результат шага:\n${simplexTables2.last()}")
     }
     val lastStep2 = simplexTables2.last()
     println("\nМинимальное значение f* = ${lastStep2.functionValue}")
     println("Достигается в точке x* = ${lastStep2.vertex}")
+
+    println()
+    val simplexTables3 = mutableListOf<SimplexTable>()
+    simplexTables3.add(sb extractSolutionFrom lastStep2)
+    println("\nНачальная симплекс-таблица после искусственного базиса:\n${simplexTables3.last()}")
+    while (true) {
+        val possibleValues = simplexTables3.last().possibleReplaces()?.first() ?: break
+        val s = possibleValues.first
+        val r = possibleValues.second
+        println("\nШаг ${simplexTables3.size}")
+        println("Вводим в базис x${s + 1}, выводим x${r + 1}")
+        simplexTables3.add(simplexTables3.last() changeBasisBy possibleValues)
+        println("Результат шага:\n${simplexTables3.last()}")
+    }
+    val lastStep3 = simplexTables3.last()
+    println("\nМинимальное значение f* = ${lastStep3.functionValue}")
+    println("Достигается в точке x* = ${lastStep3.vertex}")
 }

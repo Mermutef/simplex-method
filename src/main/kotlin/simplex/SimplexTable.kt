@@ -35,16 +35,15 @@ class SimplexTable(
     /**
      * Очередной шаг симплекс-метода
      *
-     * @param s индекс переменной, которая вводится в базис
-     * @param r индекс переменной, которая выводится из базиса
+     * @param inOutPair индексы переменных, которые вводится в базис и выводятся из базиса соответственно
      *
      * @return новую симплекс-таблицу - результат очередного шага симплекс-метода
      */
-    operator fun invoke(s: Int, r: Int): SimplexTable {
+    infix fun changeBasisBy(inOutPair: Pair<Int, Int>): SimplexTable {
         // порядковый номер переменной, вводимой в базис
-        val sIdx = matrix.fullIndices.indexOf(s)
+        val sIdx = matrix.fullIndices.indexOf(inOutPair.first)
         // порядковый номер переменной, выводимой из базиса
-        val rIdx = matrix.fullIndices.indexOf(r)
+        val rIdx = matrix.fullIndices.indexOf(inOutPair.second)
         // новый порядок переменных
 
         val newVariablesIndices = matrix.fullIndices.swap(rIdx, sIdx)

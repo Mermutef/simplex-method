@@ -62,14 +62,15 @@ data class Matrix(
     }
 
     // переопределенные математические операторы для удобной работы со строками
-    // (умножение, деление на дробь, вычитание двух векторов)
+    // (умножение и деление на дробь, сложение и вычитание двух векторов, ...)
     companion object {
         operator fun Array<Fraction>.times(coff: Fraction): Array<Fraction> = this.map { it * coff }.toTypedArray()
         operator fun Array<Fraction>.div(coff: Fraction): Array<Fraction> = this.map { it / coff }.toTypedArray()
-        operator fun Array<Fraction>.minus(other: Array<Fraction>): Array<Fraction> =
-            this.zip(other).map { (a, b) -> a - b }.toTypedArray()
         operator fun Array<Fraction>.plus(other: Array<Fraction>): Array<Fraction> =
             this.zip(other).map { (a, b) -> a + b }.toTypedArray()
+        operator fun Array<Fraction>.minus(other: Array<Fraction>): Array<Fraction> =
+            this.zip(other).map { (a, b) -> a - b }.toTypedArray()
+        operator fun Array<Fraction>.unaryMinus() = this * Fraction(-1)
 
         /**
          * Смена двух значений списка местами.
