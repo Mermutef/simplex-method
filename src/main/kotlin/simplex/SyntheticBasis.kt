@@ -9,6 +9,9 @@ class SyntheticBasis(
     val matrix: Matrix,
     val function: Function,
 ) {
+    /**
+     * Список индексов искусственных базисных переменных
+     */
     val syntheticBasis: List<Int>
         get() {
             val syntheticBasisMutable = mutableListOf<Int>()
@@ -17,9 +20,16 @@ class SyntheticBasis(
             }
             return syntheticBasisMutable
         }
+
+    /**
+     * Список индексов свободных переменных
+     */
     val free: List<Int>
         get() = matrix.basis + matrix.free
 
+    /**
+     * Начальная симплекс-таблица метода искусственного базиса
+     */
     val startTable: SimplexTable
         get() {
             val extendedFunctionCoefficients = function.coefficients.map { Fraction(0) }.toMutableList()
@@ -49,6 +59,11 @@ class SyntheticBasis(
             )
         }
 
+    /**
+     * Получение начальной симплекс таблицы для классического симплекс-метода
+     *
+     * @return начальную симплекс-таблицу исходной задачи
+     */
     // todo холостой ход
     infix fun extractSolutionFrom(lastTable: SimplexTable): SimplexTable {
         if (lastTable

@@ -96,6 +96,11 @@ class SimplexTable(
             ?.takeIf { it.isNotEmpty() }
     }
 
+    /**
+     * Координаты для выполнения холостого хода симплекс-метода
+     *
+     * @return пара (s, r) - индексы вводимой "натуральной" переменной и выводимой искусственной переменной
+     */
     private fun idleRunningReplaces(): List<Pair<Int, Int>>? {
         val functionInBasis = function.inBasisOf(matrix)
 
