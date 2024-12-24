@@ -1,0 +1,57 @@
+{
+  "matrix" : {
+    "n" : 5,
+    "m" : 2,
+    "coefficients" : [ [ {
+      "numerator" : 1,
+      "denominator" : 1
+    }, {
+      "numerator" : 2,
+      "denominator" : 1
+    }, {
+      "numerator" : 5,
+      "denominator" : 1
+    }, {
+      "numerator" : -1,
+      "denominator" : 1
+    }, {
+      "numerator" : 4,
+      "denominator" : 1
+    } ], [ {
+      "numerator" : 1,
+      "denominator" : 1
+    }, {
+      "numerator" : -1,
+      "denominator" : 1
+    }, {
+      "numerator" : -1,
+      "denominator" : 1
+    }, {
+      "numerator" : 2,
+      "denominator" : 1
+    }, {
+      "numerator" : 1,
+      "denominator" : 1
+    } ] ],
+    "basis" : [ 0, 1 ],
+    "free" : [ 2, 3 ]
+  },
+  "function" : {
+    "coefficients" : [ {
+      "numerator" : -2,
+      "denominator" : 1
+    }, {
+      "numerator" : -1,
+      "denominator" : 1
+    }, {
+      "numerator" : -3,
+      "denominator" : 1
+    }, {
+      "numerator" : -1,
+      "denominator" : 1
+    }, {
+      "numerator" : 0,
+      "denominator" : 1
+    } ]
+  }
+}

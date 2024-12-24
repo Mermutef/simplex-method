@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="author" content="Владислав Копнин"/>
+    <meta name="description" content="Выбор категории услуги"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{% block title %}Заголовок страницы{% endblock %}</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+</head>
+<body>
+
+<nav class="navbar sticky-top navbar-expand-lg bg-{% block menuColor %}primary{% endblock %}" data-bs-theme="dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">ЛабаМО</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto">
+                {% block login %}
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="/login"
+                           target="_self">Убить</a>
+                    </li>
+                {% endblock %}
+            </ul>
+        </div>
+
+    </div>
+</nav>
+<div class="container">
+    <h1 class="my-4">{% block pageHeading %}Заголовок{% endblock %}</h1>
+    <div class="my-4">{% block pageInner %}<p><b>Тело</b>{{ model.description }}</p>{% endblock %}</div>
+</div>
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

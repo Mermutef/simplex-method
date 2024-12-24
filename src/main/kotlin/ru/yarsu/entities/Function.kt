@@ -15,7 +15,7 @@ class Function(
      */
     fun inBasisOf(matrix: Matrix): Function {
         val newCoefficients = mutableListOf<Fraction>()
-        coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction(0)) }
+        coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction.from(0)) }
         matrix.coefficients.mapIndexed { rowIdx, row -> row * coefficients[matrix.basis[rowIdx]] }
             .reduce { row1, row2 -> row1 + row2 }
             .forEachIndexed { idx, pi ->
@@ -35,7 +35,7 @@ class Function(
         coefficients.forEachIndexed { i, pi ->
             res +=
                 when {
-                    pi != Fraction(0) -> {
+                    pi != Fraction.from(0) -> {
                         if (isFirst) {
                             isFirst = false
                             if (pi < 0) "-" else ""

@@ -5,55 +5,19 @@ import kotlin.math.abs
 import kotlin.math.min
 
 @Suppress("detekt:TooManyFunctions")
-class Fraction : Comparable<Fraction> {
-    val numerator: Long
-    val denominator: Long
-
-    // конструкторы
-    constructor(numerator: Long, denominator: Long) {
-        require(denominator != 0L) {
-            "The denominator of fraction must be not null value"
-        }
-        this.numerator = numerator
-        this.denominator = denominator
-    }
-
-    constructor(numerator: Int, denominator: Int) {
-        require(denominator != 0) {
-            "The denominator of fraction must be not null value"
-        }
-        this.numerator = numerator * 1L
-        this.denominator = denominator * 1L
-    }
-
-    constructor(numerator: Long) {
-        this.numerator = numerator
-        this.denominator = 1L
-    }
-
-    constructor(numerator: Int) {
-        this.numerator = numerator * 1L
-        this.denominator = 1L
-    }
-
+class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> {
     @Suppress("detekt:TooManyFunctions")
     // математические операции для работы с дробью как с обычным числом
     companion object {
-        operator fun Int.div(other: Fraction): Fraction = Fraction(this) / other
+        fun from(numerator: Int) = Fraction(numerator, 1)
 
-        operator fun Int.plus(other: Fraction): Fraction = Fraction(this) + other
+        operator fun Int.div(other: Fraction): Fraction = from(this) / other
 
-        operator fun Int.minus(other: Fraction): Fraction = Fraction(this) - other
+        operator fun Int.plus(other: Fraction): Fraction = from(this) + other
 
-        operator fun Int.times(other: Fraction): Fraction = Fraction(this) * other
+        operator fun Int.minus(other: Fraction): Fraction = from(this) - other
 
-        operator fun Long.div(other: Fraction): Fraction = Fraction(this) / other
-
-        operator fun Long.plus(other: Fraction): Fraction = Fraction(this) + other
-
-        operator fun Long.minus(other: Fraction): Fraction = Fraction(this) - other
-
-        operator fun Long.times(other: Fraction): Fraction = Fraction(this) * other
+        operator fun Int.times(other: Fraction): Fraction = from(this) * other
 
         /**
          * Приведение строки к дроби. Строка должна иметь вид [-]a/b, где a и b - целые числа
@@ -70,13 +34,13 @@ class Fraction : Comparable<Fraction> {
                     .map {
                         it
                             .trim()
-                            .toLongOrNull()
+                            .toIntOrNull()
                             ?: throw IllegalArgumentException("Invalid fraction string")
                     }.takeIf { it.size in 1..2 }
                     ?: throw IllegalArgumentException("Invalid fraction string")
 
             return when (values.size) {
-                1 -> Fraction(values[0])
+                1 -> from(values[0])
                 else -> Fraction(values[0], values[1])
             }
         }
@@ -91,14 +55,14 @@ class Fraction : Comparable<Fraction> {
 
         operator fun Int.compareTo(other: Fraction): Int =
             other.shorten()
-                .takeIf { it.denominator == 1L }
+                .takeIf { it.denominator == 1 }
                 ?.numerator
                 ?.compareTo(other)
                 ?: (this * 1.0).compareTo(other.toDouble())
 
         operator fun Long.compareTo(other: Fraction): Int =
             other.shorten()
-                .takeIf { it.denominator == 1L }
+                .takeIf { it.denominator == 1 }
                 ?.numerator
                 ?.compareTo(other)
                 ?: (this * 1.0).compareTo(other.toDouble())
@@ -110,9 +74,9 @@ class Fraction : Comparable<Fraction> {
      * @return новую дробь, сокращенную по правилам математики
      */
     fun shorten(): Fraction {
-        val a = BigInteger.valueOf(abs(this.numerator))
-        val b = BigInteger.valueOf(abs(this.denominator))
-        val divider = a.gcd(b).toLong()
+        val a = BigInteger.valueOf(abs(this.numerator * 1L))
+        val b = BigInteger.valueOf(abs(this.denominator * 1L))
+        val divider = a.gcd(b).toInt()
         val shortenFraction =
             Fraction(
                 numerator = this.numerator / divider,
@@ -138,8 +102,8 @@ class Fraction : Comparable<Fraction> {
 
     override fun toString(): String =
         when {
-            this.denominator == 1L -> this.numerator.toString()
-            this.numerator == 0L -> "0"
+            this.denominator == 1 -> this.numerator.toString()
+            this.numerator == 0 -> "0"
             else -> "${this.numerator}/${this.denominator}"
         }
 
@@ -172,21 +136,13 @@ class Fraction : Comparable<Fraction> {
 
     operator fun unaryMinus(): Fraction = Fraction(-this.numerator, this.denominator)
 
-    operator fun plus(other: Int): Fraction = this + Fraction(other)
+    operator fun plus(other: Int): Fraction = this + from(other)
 
-    operator fun minus(other: Int): Fraction = this - Fraction(other)
+    operator fun minus(other: Int): Fraction = this - from(other)
 
-    operator fun times(other: Int): Fraction = this * Fraction(other)
+    operator fun times(other: Int): Fraction = this * from(other)
 
-    operator fun div(other: Int): Fraction = this / Fraction(other)
-
-    operator fun plus(other: Long): Fraction = this + Fraction(other)
-
-    operator fun minus(other: Long): Fraction = this - Fraction(other)
-
-    operator fun times(other: Long): Fraction = this * Fraction(other)
-
-    operator fun div(other: Long): Fraction = this / Fraction(other)
+    operator fun div(other: Int): Fraction = this / from(other)
 
     override fun hashCode(): Int {
         var result = numerator.hashCode()
@@ -213,14 +169,14 @@ class Fraction : Comparable<Fraction> {
 
     operator fun compareTo(other: Int): Int =
         this.shorten()
-            .takeIf { it.denominator == 1L }
+            .takeIf { it.denominator == 1 }
             ?.numerator
             ?.compareTo(other * 1L)
             ?: this.toDouble().compareTo(other * 1.0)
 
     operator fun compareTo(other: Long): Int =
         this.shorten()
-            .takeIf { it.denominator == 1L }
+            .takeIf { it.denominator == 1 }
             ?.numerator
             ?.compareTo(other)
             ?: this.toDouble().compareTo(other * 1.0)
@@ -228,8 +184,8 @@ class Fraction : Comparable<Fraction> {
     // получение знака дроби
     private fun sign(): Int =
         when {
-            this.numerator * this.denominator > 0L ||
-                this.numerator * this.denominator < 0L ->
+            this.numerator * this.denominator > 0 ||
+                this.numerator * this.denominator < 0 ->
                 (
                     min(this.numerator, this.denominator) / abs(min(this.numerator, this.denominator))
                 ).toInt()

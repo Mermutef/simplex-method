@@ -1,5 +1,6 @@
 package ru.yarsu.simplex
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import ru.yarsu.entities.Fraction
 import ru.yarsu.entities.Function
 import ru.yarsu.entities.Matrix
@@ -12,6 +13,7 @@ class SyntheticBasis(
     /**
      * Список индексов искусственных базисных переменных
      */
+    @get:JsonIgnore
     val basis: List<Int>
         get() {
             val syntheticBasisMutable = mutableListOf<Int>()
@@ -24,28 +26,30 @@ class SyntheticBasis(
     /**
      * Список индексов свободных переменных
      */
+    @get:JsonIgnore
     val free: List<Int>
         get() = matrix.basis + matrix.free
 
     /**
      * Начальная симплекс-таблица метода искусственного базиса
      */
+    @get:JsonIgnore
     val startTable: SimplexTable
         get() {
-            val extendedFunctionCoefficients = function.coefficients.map { Fraction(0) }.toMutableList()
+            val extendedFunctionCoefficients = function.coefficients.map { Fraction.from(0) }.toMutableList()
             extendedFunctionCoefficients.removeLast()
             val extendedMatrixCoefficients = mutableListOf<MutableList<Fraction>>()
             matrix.basis.forEachIndexed { i, _ ->
-                extendedFunctionCoefficients.addLast(Fraction(1))
+                extendedFunctionCoefficients.addLast(Fraction.from(1))
                 val newRow = mutableListOf<Fraction>()
                 matrix.basis.forEachIndexed { j, _ ->
-                    newRow.add(if (i == j) Fraction(1) else Fraction(0))
+                    newRow.add(if (i == j) Fraction.from(1) else Fraction.from(0))
                 }
                 val matrixRow = matrix.coefficients[i]
                 val correctMatrixRow = if (matrixRow[matrix.bIdx] > 0) matrixRow else -matrixRow
                 extendedMatrixCoefficients.add((newRow + correctMatrixRow).toMutableList())
             }
-            extendedFunctionCoefficients.addLast(Fraction(0))
+            extendedFunctionCoefficients.addLast(Fraction.from(0))
 
             return SimplexTable(
                 matrix =
@@ -70,8 +74,8 @@ class SyntheticBasis(
                 .function
                 .coefficients
                 .filterIndexed { idx, _ -> idx in (lastTable.matrix.free - basis.toSet()) }
-                .any { it != Fraction(0) } ||
-            lastTable.function.coefficients[lastTable.matrix.bIdx] != Fraction(0)
+                .any { it != Fraction.from(0) } ||
+            lastTable.function.coefficients[lastTable.matrix.bIdx] != Fraction.from(0)
         ) {
             error("Невозможно построить начальную симплекс таблицу.")
         }

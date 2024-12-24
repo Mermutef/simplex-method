@@ -1,0 +1,34 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.HomePageVM" #}
+
+    {% extends "./partials/Layout.peb" %}
+    {% block title %}Сиплекс-метод{% endblock %}
+    {% block pageHeading %}Условие задачи{% endblock %}
+{% block pageInner %}
+<div class="row mb-3">
+    <form method="post" enctype="multipart/form-data">
+        <div class="col mb-3">
+            <label for="task-type">Тип задачи:</label>
+            <select name="task-type" id="task-type">
+                <option value="min" {% if model.form.fields["task-type"].first().value == "min" %} selected{% endif %}>минимум</option>
+                <option value="max" {% if model.form.fields["task-type"].first().value == "max" %} selected{% endif %}>максимум</option>
+            </select>
+        </div>
+        <div class="col mb-3">
+            <label for="method">
+                Метод:
+            </label>
+            <select name="method" id="method">
+                <option value="simplex-method" {% if model.form.fields["method"].first().value == "simplex-method" %} selected{% endif %}>симплекс-метод</option>
+                <option value="synthetic-basis" {% if model.form.fields["method"].first().value == "synthetic-basis" %} selected{% endif %}>искусственный базис</option>
+            </select>
+        </div>
+        <div class="col mb-3"><input type="file" name="file" accept="application/json" value="{{ model.form.files["file"].first().content }}"></div>
+        <button class="btn btn-primary">Вычислить</button>
+    </form>
+</div>
+<div class="row row-cols-1">
+    {% for st in model.strings %}
+    <div class="col">{{ st }}</div>
+    {% endfor %}
+</div>
+{% endblock %}

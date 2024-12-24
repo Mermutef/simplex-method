@@ -1,5 +1,7 @@
 package ru.yarsu.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 data class Matrix(
     val n: Int,
     val m: Int,
@@ -10,12 +12,14 @@ data class Matrix(
     /**
      * Индекс столбца свободного члена
      */
+    @get:JsonIgnore
     val bIdx: Int
         get() = n - 1
 
     /**
      * Список индексов переменных (базисные + свободные + свободный член)
      */
+    @get:JsonIgnore
     val fullIndices: List<Int>
         get() = basis + free + listOf(bIdx)
 
@@ -85,7 +89,7 @@ data class Matrix(
                 .map { (a, b) -> a - b }
                 .toTypedArray()
 
-        operator fun Array<Fraction>.unaryMinus() = this * Fraction(-1)
+        operator fun Array<Fraction>.unaryMinus() = this * Fraction.from(-1)
 
         /**
          * Смена двух значений списка местами.

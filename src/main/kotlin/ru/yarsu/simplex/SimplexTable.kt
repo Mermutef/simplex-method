@@ -1,5 +1,6 @@
 package ru.yarsu.simplex
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import ru.yarsu.entities.Fraction
 import ru.yarsu.entities.Function
 import ru.yarsu.entities.Matrix
@@ -12,6 +13,7 @@ class SimplexTable(
     /**
      * Координаты текущей вершины
      */
+    @get:JsonIgnore
     val vertex: List<Fraction>
         get() {
             val values = mutableListOf<Pair<Int, Fraction>>()
@@ -20,7 +22,7 @@ class SimplexTable(
                 values.add(Pair(i, matrix.coefficients[iIdx][matrix.bIdx]))
             }
             for (i in matrix.free) {
-                values.add(Pair(i, Fraction(0)))
+                values.add(Pair(i, Fraction.from(0)))
             }
 
             return values.sortedBy { it.first }.map { it.second }
@@ -29,6 +31,7 @@ class SimplexTable(
     /**
      * Значение функции в текущей вершине
      */
+    @get:JsonIgnore
     val functionValue: Fraction
         get() = -function.inBasisOf(matrix).coefficients.last()
 
@@ -105,14 +108,14 @@ class SimplexTable(
     private fun idleRunningReplaces(): List<Pair<Int, Int>>? {
         val functionInBasis = function.inBasisOf(matrix)
 
-        val possibleS = matrix.free.filter { functionInBasis.coefficients[it] == Fraction(0) }
+        val possibleS = matrix.free.filter { functionInBasis.coefficients[it] == Fraction.from(0) }
 
         for (s in possibleS) {
             val sIdx = matrix.fullIndices.indexOf(s)
             for (r in matrix.basis) {
                 val rIdx = matrix.fullIndices.indexOf(r)
-                if (matrix.coefficients[rIdx][sIdx] != Fraction(0) &&
-                    matrix.coefficients[rIdx][matrix.bIdx] == Fraction(0)
+                if (matrix.coefficients[rIdx][sIdx] != Fraction.from(0) &&
+                    matrix.coefficients[rIdx][matrix.bIdx] == Fraction.from(0)
                 ) {
                     return listOf(Pair(s, r))
                 }
@@ -125,4 +128,14 @@ class SimplexTable(
     override fun toString(): String {
         return "${function.inBasisOf(matrix)}\n$matrix"
     }
+}
+
+enum class Method {
+    SIMPLEX_METHOD,
+    SYNTHETIC_BASIS,
+}
+
+enum class TaskType {
+    MAX,
+    MIN,
 }
