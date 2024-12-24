@@ -1,8 +1,8 @@
 package ru.yarsu.simplex
 
 import ru.yarsu.entities.Fraction
-import ru.yarsu.entities.Matrix
 import ru.yarsu.entities.Function
+import ru.yarsu.entities.Matrix
 import ru.yarsu.entities.Matrix.Companion.unaryMinus
 
 class SyntheticBasis(
@@ -12,7 +12,7 @@ class SyntheticBasis(
     /**
      * Список индексов искусственных базисных переменных
      */
-    val syntheticBasis: List<Int>
+    val basis: List<Int>
         get() {
             val syntheticBasisMutable = mutableListOf<Int>()
             matrix.basis.forEachIndexed { i, _ ->
@@ -48,13 +48,14 @@ class SyntheticBasis(
             extendedFunctionCoefficients.addLast(Fraction(0))
 
             return SimplexTable(
-                matrix = Matrix(
-                    coefficients = extendedMatrixCoefficients,
-                    n = matrix.n + matrix.m,
-                    m = matrix.m,
-                    basis = syntheticBasis,
-                    free = free,
-                ),
+                matrix =
+                    Matrix(
+                        coefficients = extendedMatrixCoefficients,
+                        n = matrix.n + matrix.m,
+                        m = matrix.m,
+                        basis = basis,
+                        free = free,
+                    ),
                 function = Function(coefficients = extendedFunctionCoefficients),
             )
         }
@@ -64,12 +65,11 @@ class SyntheticBasis(
      *
      * @return начальную симплекс-таблицу исходной задачи
      */
-    // todo холостой ход
     infix fun extractSolutionFrom(lastTable: SimplexTable): SimplexTable {
         if (lastTable
                 .function
                 .coefficients
-                .filterIndexed { idx, _ -> idx in (lastTable.matrix.free - syntheticBasis.toSet()) }
+                .filterIndexed { idx, _ -> idx in (lastTable.matrix.free - basis.toSet()) }
                 .any { it != Fraction(0) } ||
             lastTable.function.coefficients[lastTable.matrix.bIdx] != Fraction(0)
         ) {
@@ -77,17 +77,19 @@ class SyntheticBasis(
         }
 
         return SimplexTable(
-            matrix = Matrix(
-                coefficients = lastTable.matrix.coefficients.map { row ->
-                    row.filterIndexed { j, _ ->
-                        lastTable.matrix.fullIndices[j] in (free + lastTable.matrix.bIdx)
-                    }
-                },
-                basis = lastTable.matrix.basis,
-                free = lastTable.matrix.free.filter { it !in syntheticBasis },
-                n = matrix.n,
-                m = matrix.m,
-            ),
+            matrix =
+                Matrix(
+                    coefficients =
+                        lastTable.matrix.coefficients.map { row ->
+                            row.filterIndexed { j, _ ->
+                                lastTable.matrix.fullIndices[j] in (free + lastTable.matrix.bIdx)
+                            }
+                        },
+                    basis = lastTable.matrix.basis,
+                    free = lastTable.matrix.free.filter { it !in basis },
+                    n = matrix.n,
+                    m = matrix.m,
+                ),
             function = function,
         )
     }

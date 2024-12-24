@@ -5,84 +5,86 @@ import ru.yarsu.entities.Function
 import ru.yarsu.entities.Matrix
 import ru.yarsu.simplex.SimplexTable
 import ru.yarsu.simplex.SyntheticBasis
+import java.awt.Desktop
 import java.io.File
+import java.net.URI
+import java.net.URISyntaxException
+import java.net.URL
 
 
-/**
- * Вопросы:
- * - пример, где нужен холостой ход (для отладки)
- * - условия возможности холостого хода - коэффициенты функции
- * при небазисных переменных 0, сама функция 0, в столбце b есть хотя бы один 0
- * и хотя бы в одной соответствующей строке есть хотя бы один не нулевой элемент?
- * - для простого симплекс-метода нужно, чтобы все bi были неотрицательны?
- * - насколько нужно комментировать код?
- * - можно ли сделать в виде браузерного приложения, а не настольного?
- */
-
-// временная точка входа в приложение
+@Suppress("detekt:LongMethod", "detekt:CyclomaticComplexMethod")
 fun main(args: Array<String>) {
     // файл откуда будет считана матрица, n, m, базис
-    val matrixFile = File(
-        args
-            .firstOrNull { it.startsWith("matrix=") }
-            ?.removePrefix("matrix=")
-            ?: "matrix.txt"
-    )
+    val matrixFile =
+        File(
+            args
+                .firstOrNull { it.startsWith("matrix=") }
+                ?.removePrefix("matrix=")
+                ?: "matrix.txt",
+        )
 
     // файл откуда будет считана функция
-    val funFile = File(
-        args
-            .firstOrNull { it.startsWith("fun=") }
-            ?.removePrefix("fun=")
-            ?: "function.txt"
-    )
+    val funFile =
+        File(
+            args
+                .firstOrNull { it.startsWith("fun=") }
+                ?.removePrefix("fun=")
+                ?: "function.txt",
+        )
 
     // попытка считать функцию, пустые строки отбрасываются
-    val fn = runCatching { funFile.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }
-        .getOrNull()
-        ?.firstOrNull()
-        ?: error("Файл ${funFile.path} не найден")
+    val fn =
+        runCatching { funFile.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }
+            .getOrNull()
+            ?.firstOrNull()
+            ?: error("Файл ${funFile.path} не найден")
 
     // первичная проверка коэффициентов функции и сбор в список
     val coffs = fn.split(" ").mapNotNull { it.toFractionOrNull() }.toMutableList()
 
     // чтение строк матрицы, n, m, базиса, пустые строки пропускаются
-    val rows = runCatching { matrixFile.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }.getOrNull()
-        ?: error("Файл ${matrixFile.path} не найден")
+    val rows =
+        runCatching { matrixFile.readLines().filter { it.isNotBlank() || it.isNotEmpty() } }.getOrNull()
+            ?: error("Файл ${matrixFile.path} не найден")
 
     // число строк матрицы
-    val m = rows[0].split(" ")[0]
-        .toIntOrNull()
-        ?.takeIf { it > 0 }
-        ?: error("Число строк должно быть натуральным числом.")
+    val m =
+        rows[0].split(" ")[0]
+            .toIntOrNull()
+            ?.takeIf { it > 0 }
+            ?: error("Число строк должно быть натуральным числом.")
 
     // число столбцов матрицы
-    val n = rows[0].split(" ")[1]
-        .toIntOrNull()
-        ?.takeIf { it > 0 && it >= m }
-        ?: error("Число строк должно быть натуральным числом, не меньшим m=$m")
+    val n =
+        rows[0].split(" ")[1]
+            .toIntOrNull()
+            ?.takeIf { it > 0 && it >= m }
+            ?: error("Число строк должно быть натуральным числом, не меньшим m=$m")
 
     // базис, в котором будет происходить поиск решения
-    val newBasis = rows[1].split(" ")
-        .map {
-            it.toIntOrNull() ?: error("Индексы базисных переменных должны быть целыми числами")
-        }
-        .distinct()
+    val newBasis =
+        rows[1].split(" ")
+            .map {
+                it.toIntOrNull() ?: error("Индексы базисных переменных должны быть целыми числами")
+            }
+            .distinct()
 
     // создание самой матрицы
-    val matrix = Matrix(
-        n = n,
-        m = m,
-        coefficients = rows.slice(2..<rows.size).map { row ->
-            row.split(" ")
-                .map {
-                    it.toFractionOrNull()
-                        ?: error("Дробь должна выглядеть как '8/-15' и иметь знаменатель отличный от нуля")
-                }
-        },
-        basis = (0..<m).toList(),
-        free = (m..<n - 1).toList(),
-    )
+    val matrix =
+        Matrix(
+            n = n,
+            m = m,
+            coefficients =
+                rows.slice(2..<rows.size).map { row ->
+                    row.split(" ")
+                        .map {
+                            it.toFractionOrNull()
+                                ?: error("Дробь должна выглядеть как '8/-15' и иметь знаменатель отличный от нуля")
+                        }
+                },
+            basis = (0..<m).toList(),
+            free = (m..<n - 1).toList(),
+        )
     // создание функции
     val f = Function(coffs)
 
@@ -94,12 +96,13 @@ fun main(args: Array<String>) {
     // создание нулевого шага симплекс-метода
     simplexTables.add(
         SimplexTable(
-            matrix = matrix
-                .inBasis(newBasis = newBasis, newFree = (0..<n - 1).filter { it !in newBasis })
-                .straightRunning()
-                .reverseRunning(),
+            matrix =
+                matrix
+                    .inBasis(newBasis = newBasis, newFree = (0..<n - 1).filter { it !in newBasis })
+                    .straightRunning()
+                    .reverseRunning(),
             function = f,
-        )
+        ),
     )
     println("\nНачальная симплекс-таблица:\n${simplexTables.last()}")
     // пока можем сделать шаг симплекс метода
@@ -148,4 +151,27 @@ fun main(args: Array<String>) {
     val lastStep3 = simplexTables3.last()
     println("\nМинимальное значение f* = ${lastStep3.functionValue}")
     println("Достигается в точке x* = ${lastStep3.vertex}")
+    openWebpage(URI.create("http://localhost:9000/"))
+}
+
+fun openWebpage(uri: URI?): Boolean {
+    val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
+    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+        try {
+            desktop.browse(uri)
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    return false
+}
+
+fun openWebpage(url: URL): Boolean {
+    try {
+        return openWebpage(url.toURI())
+    } catch (e: URISyntaxException) {
+        e.printStackTrace()
+    }
+    return false
 }

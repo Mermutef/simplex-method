@@ -7,7 +7,6 @@ data class Matrix(
     val basis: List<Int>,
     val free: List<Int>,
 ) {
-    // неизменяемые поля для удобства работы с классом
     /**
      * Индекс столбца свободного члена
      */
@@ -64,12 +63,28 @@ data class Matrix(
     // переопределенные математические операторы для удобной работы со строками
     // (умножение и деление на дробь, сложение и вычитание двух векторов, ...)
     companion object {
-        operator fun Array<Fraction>.times(coff: Fraction): Array<Fraction> = this.map { it * coff }.toTypedArray()
-        operator fun Array<Fraction>.div(coff: Fraction): Array<Fraction> = this.map { it / coff }.toTypedArray()
+        operator fun Array<Fraction>.times(coff: Fraction): Array<Fraction> =
+            this
+                .map { it * coff }
+                .toTypedArray()
+
+        operator fun Array<Fraction>.div(coff: Fraction): Array<Fraction> =
+            this
+                .map { it / coff }
+                .toTypedArray()
+
         operator fun Array<Fraction>.plus(other: Array<Fraction>): Array<Fraction> =
-            this.zip(other).map { (a, b) -> a + b }.toTypedArray()
+            this
+                .zip(other)
+                .map { (a, b) -> a + b }
+                .toTypedArray()
+
         operator fun Array<Fraction>.minus(other: Array<Fraction>): Array<Fraction> =
-            this.zip(other).map { (a, b) -> a - b }.toTypedArray()
+            this
+                .zip(other)
+                .map { (a, b) -> a - b }
+                .toTypedArray()
+
         operator fun Array<Fraction>.unaryMinus() = this * Fraction(-1)
 
         /**
@@ -77,7 +92,10 @@ data class Matrix(
          *
          * @return Новый список с поменянными местами i-ым и j-ым элементами
          */
-        fun <T> List<T>.swap(i: Int, j: Int): List<T> {
+        fun <T> List<T>.swap(
+            i: Int,
+            j: Int,
+        ): List<T> {
             val iItem = this[i]
             val jItem = this[j]
             val newList = mutableListOf<T>()
@@ -180,9 +198,12 @@ data class Matrix(
 
     override fun toString(): String {
         val maxColLength = coefficients.flatten().maxBy { it.toString().length }.toString().length
-        return (listOf(
-            fullIndices.map { basisIdx -> if (basisIdx + 1 != n) "x${basisIdx + 1}" else "b" })
-                + coefficients.map { row -> row.map { coff -> coff.toString() } }).joinToString("\n") {
+        return (
+            listOf(
+                fullIndices.map { basisIdx -> if (basisIdx + 1 != n) "x${basisIdx + 1}" else "b" },
+            ) +
+                coefficients.map { row -> row.map { coff -> coff.toString() } }
+        ).joinToString("\n") {
             it.joinToString("  ") { x -> "${" ".repeat(maxColLength - x.length)}$x" }
         }
     }

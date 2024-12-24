@@ -68,9 +68,10 @@ class SimplexTable(
 
         val functionInBasis = function.inBasisOf(matrix)
 
-        val possibleS = matrix.free.filter { idx ->
-            functionInBasis.coefficients[idx] < 0
-        }
+        val possibleS =
+            matrix.free.filter { idx ->
+                functionInBasis.coefficients[idx] < 0
+            }
         val fractions = mutableListOf<Triple<Fraction, Int, Int>>()
 
         for (s in possibleS) {
@@ -83,7 +84,7 @@ class SimplexTable(
                             matrix.coefficients[rIdx][matrix.bIdx] / matrix.coefficients[rIdx][sIdx],
                             s,
                             r,
-                        )
+                        ),
                     )
                 }
             }
@@ -125,4 +126,3 @@ class SimplexTable(
         return "${function.inBasisOf(matrix)}\n$matrix"
     }
 }
-

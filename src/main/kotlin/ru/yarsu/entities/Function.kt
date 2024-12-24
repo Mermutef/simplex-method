@@ -1,7 +1,7 @@
 package ru.yarsu.entities
 
-import ru.yarsu.entities.Matrix.Companion.times
 import ru.yarsu.entities.Matrix.Companion.plus
+import ru.yarsu.entities.Matrix.Companion.times
 
 class Function(
     val coefficients: List<Fraction>,
@@ -32,20 +32,20 @@ class Function(
         val n = coefficients.size
         var res = ""
         var isFirst = true
-        for (i in 0..<n) {
-            val pi = coefficients[i]
-            res += when {
-                pi != Fraction(0) -> {
-                    if (isFirst) {
-                        isFirst = false
-                        if (pi < 0) "-" else ""
-                    } else {
-                        if (pi < 0) "- " else "+ "
-                    } + "${if (!pi.abs().equals(1)) "${pi.abs()}" else ""}${if (i != n - 1) "x${i + 1}" else ""} "
-                }
+        coefficients.forEachIndexed { i, pi ->
+            res +=
+                when {
+                    pi != Fraction(0) -> {
+                        if (isFirst) {
+                            isFirst = false
+                            if (pi < 0) "-" else ""
+                        } else {
+                            if (pi < 0) "- " else "+ "
+                        } + "${if (!pi.abs().equals(1)) "${pi.abs()}" else ""}${if (i != n - 1) "x${i + 1}" else ""} "
+                    }
 
-                else -> ""
-            }
+                    else -> ""
+                }
         }
         return "$res-> min"
     }
