@@ -5,10 +5,12 @@ import ru.yarsu.entities.Fraction
 import ru.yarsu.entities.Function
 import ru.yarsu.entities.Matrix
 import ru.yarsu.entities.Matrix.Companion.swap
+import ru.yarsu.entities.TaskType
 
 class SimplexTable(
     val matrix: Matrix,
     val function: Function,
+    val taskType: TaskType = TaskType.MIN,
 ) {
     /**
      * Координаты текущей вершины
@@ -33,7 +35,8 @@ class SimplexTable(
      */
     @get:JsonIgnore
     val functionValue: Fraction
-        get() = -function.inBasisOf(matrix).coefficients.last()
+        get() = function.inBasisOf(matrix, taskType).coefficients.last()
+
 
     /**
      * Очередной шаг симплекс-метода
@@ -58,6 +61,7 @@ class SimplexTable(
         return SimplexTable(
             matrix = newMatrix,
             function = function,
+            taskType = taskType,
         )
     }
 
@@ -69,7 +73,7 @@ class SimplexTable(
     fun possibleReplaces(forIdleRunning: Boolean = false): List<Pair<Int, Int>>? {
         if (forIdleRunning) return idleRunningReplaces()
 
-        val functionInBasis = function.inBasisOf(matrix)
+        val functionInBasis = function.inBasisOf(matrix, taskType)
 
         val possibleS =
             matrix.free.filter { idx ->
@@ -106,7 +110,7 @@ class SimplexTable(
      * @return пара (s, r) - индексы вводимой "натуральной" переменной и выводимой искусственной переменной
      */
     private fun idleRunningReplaces(): List<Pair<Int, Int>>? {
-        val functionInBasis = function.inBasisOf(matrix)
+        val functionInBasis = function.inBasisOf(matrix, taskType)
 
         val possibleS = matrix.free.filter { functionInBasis.coefficients[it] == Fraction.from(0) }
 
@@ -126,16 +130,11 @@ class SimplexTable(
     }
 
     override fun toString(): String {
-        return "${function.inBasisOf(matrix)}\n$matrix"
+        return "${function.inBasisOf(matrix, taskType, false)} -> ${taskType.toString().lowercase()}\n$matrix"
     }
 }
 
 enum class Method {
     SIMPLEX_METHOD,
     SYNTHETIC_BASIS,
-}
-
-enum class TaskType {
-    MAX,
-    MIN,
 }

@@ -5,8 +5,8 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.with
-import ru.yarsu.web.models.NotFoundVM
 import ru.yarsu.web.context.templates.ContextAwareViewRender
+import ru.yarsu.web.models.NotFoundVM
 
 class NotFoundHandler(
     private val next: HttpHandler,

@@ -6,7 +6,7 @@
         <li class="nav-item">
             <a class="nav-link"
                onclick="document.getElementById('file').click();"
-               href=""
+               href="#"
                target="_self">Загрузить из файла
             </a>
         </li>
@@ -16,7 +16,7 @@
     {% block pageHeading %}Условие задачи{% endblock %}
 {% block pageInner %}
 <div class="row mb-3">
-    <form method="post">
+    <form method="post" action="/">
         <div class="col mb-3">
             <label for="task-type">Тип задачи:</label>
             <select name="task-type" id="task-type">
@@ -36,7 +36,7 @@
         <button class="btn btn-primary">Вычислить</button>
     </form>
 </div>
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" action="/load-from-file" hidden>
     <div class="col mb-3">
         <input type="file" name="file" id="file" accept="application/json" onchange="document.getElementById('btnb').click();">
     </div>
@@ -44,7 +44,9 @@
 </form>
 <div class="row row-cols-1">
     {% for st in model.strings %}
-    <div class="col">{{ st.replace("\n", "<br>") }}</div>
+        {% for line in st.split("\n") %}
+            <div class="col">{{ line }}</div>
+        {% endfor %}
     {% endfor %}
 </div>
 {% endblock %}

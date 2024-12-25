@@ -13,7 +13,7 @@ class Function(
      *
      * @return функция с коэффициентами, выраженными через свободные переменные матрицы
      */
-    fun inBasisOf(matrix: Matrix): Function {
+    fun inBasisOf(matrix: Matrix, taskType: TaskType, doTransform: Boolean = true): Function {
         val newCoefficients = mutableListOf<Fraction>()
         coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction.from(0)) }
         matrix.coefficients.mapIndexed { rowIdx, row -> row * coefficients[matrix.basis[rowIdx]] }
@@ -25,7 +25,8 @@ class Function(
                     else -> {}
                 }
             }
-        return Function(newCoefficients)
+
+        return Function(if (taskType == TaskType.MAX && doTransform) coefficients.map { it * -1 } else coefficients)
     }
 
     override fun toString(): String {
@@ -47,6 +48,11 @@ class Function(
                     else -> ""
                 }
         }
-        return "$res-> min"
+        return res.trim()
     }
+}
+
+enum class TaskType {
+    MAX,
+    MIN,
 }
