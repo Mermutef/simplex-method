@@ -4,7 +4,7 @@
     {% block fromFile %}
     <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-            <a class="nav-link"
+            <a class="nav-link underline"
                onclick="document.getElementById('file').click();"
                href="#"
                target="_self">Загрузить из файла
@@ -16,37 +16,157 @@
     {% block pageHeading %}Условие задачи{% endblock %}
 {% block pageInner %}
 <div class="row mb-3">
-    <form method="post" action="/">
-        <div class="col mb-3">
-            <label for="task-type">Тип задачи:</label>
-            <select name="task-type" id="task-type">
-                <option value="min" {% if model.form.fields["task-type"].first().value == "min" %} selected{% endif %}>минимум</option>
-                <option value="max" {% if model.form.fields["task-type"].first().value == "max" %} selected{% endif %}>максимум</option>
-            </select>
-        </div>
-        <div class="col mb-3">
-            <label for="method">
-                Метод:
-            </label>
-            <select name="method" id="method">
-                <option value="simplex-method" {% if model.form.fields["method"].first().value == "simplex-method" %} selected{% endif %}>симплекс-метод</option>
-                <option value="synthetic-basis" {% if model.form.fields["method"].first().value == "synthetic-basis" %} selected{% endif %}>искусственный базис</option>
-            </select>
-        </div>
-        <button class="btn btn-primary">Вычислить</button>
-    </form>
+    <div class="col">
+        <form method="post" action="/" id="taskForm">
+            <div class="row">
+                <div class="col">
+                    <div class="row mt-3">
+                        <div class="col">
+                            <h4>Коэффициенты функции</h4>
+                            <table id="function" class="table table-bordered table-sm text-center align-middle">
+                                <thead>
+                                <tr id="function-header">
+                                    <th scope="col">x1</th>
+                                    <th scope="col">x2</th>
+                                    <th scope="col">x3</th>
+                                    <th scope="col">x4</th>
+                                    <th scope="col">b</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr id="function-coefficients">
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <h4>Матрица ограничений Ax=b</h4>
+                            <table id="matrix" class="table table-bordered table-sm text-center align-middle">
+                                <thead>
+                                <tr id="matrix-header"> <!--свободные переменные-->
+                                    <th scope="col">x1</th>
+                                    <th scope="col">x2</th>
+                                    <th scope="col">x3</th>
+                                    <th scope="col">x4</th>
+                                    <th scope="col">b</th>
+                                </tr>
+                                </thead>
+                                <tbody id="matrix-rows">
+                                <tr>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                </tr>
+                                <tr>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                    <td><input class="form-control" type="text" value="0"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="row">
+                                <div class="col">
+                                    <a class="btn btn-outline-primary h-100 w-100 text-center align-middle"
+                                       onclick="deleteRow();"
+                                    >-</a>
+                                </div>
+                                <div class="col">
+                                    <a class="btn btn-outline-primary h-100 w-100 text-center align-middle"
+                                       onclick="addRow();"
+                                    >+</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-1 pb-5 pt-4">
+                            <div class="row row-cols-1 h-100 px-0 w-75 mx-0">
+                                <div class="col pb-1 px-0 mx-0">
+                                    <a class="btn btn-outline-primary h-100 w-100 text-center align-middle"
+                                       onclick="deleteColumn();">-</a>
+                                </div>
+                                <div class="col pt-1 px-0 mx-0">
+                                    <a class="btn btn-outline-primary h-100 w-100 text-center align-middle"
+                                       onclick="addColumn();"
+                                    >+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-75">
+                        <h4 class="mt-3">Индексы базисных переменных</h4>
+                        <table id="basis" class="table table-bordered table-sm text-center align-middle">
+                            <tbody>
+                            <tr id="basis-coefficients">
+                                <td><input class="form-control" type="text" value="0"></td>
+                                <td><input class="form-control" type="text" value="0"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="col mb-3">
+                        <label for="task-type">Тип задачи:</label>
+                        <select name="task-type" id="task-type" class="form-control">
+                            <option value="min"
+                                {% if model.form.fields["task-type"].first().value == "min" %}
+                                    selected
+                                {% endif %}
+                            >минимум
+                            </option>
+                            <option value="max"
+                                {% if model.form.fields["task-type"].first().value == "max" %}
+                                    selected
+                                {% endif %}
+                            >максимум
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col mb-3">
+                        <label for="method">
+                            Метод:
+                        </label>
+                        <select name="method" id="method" class="form-control">
+                            <option value="simplex-method"
+                                {% if model.form.fields["method"].first().value == "simplex-method" %}
+                                    selected
+                                {% endif %}
+                            >симплекс-метод
+                            </option>
+                            <option value="synthetic-basis"
+                                {% if model.form.fields["method"].first().value == "synthetic-basis" %}
+                                    selected
+                                {% endif %}
+                            >искусственный базис
+                            </option>
+                        </select>
+                    </div>
+                    <textarea name="tableJson" hidden></textarea>
+                    <textarea name="functionJson" hidden></textarea>
+                    <button class="btn btn-outline-primary underline"
+                            onclick="prepareData();"
+                            type="button">Вычислить
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 <form method="post" enctype="multipart/form-data" action="/load-from-file" hidden>
     <div class="col mb-3">
-        <input type="file" name="file" id="file" accept="application/json" onchange="document.getElementById('btnb').click();">
+        <input type="file"
+               name="file"
+               id="file"
+               accept="application/json"
+               onchange="document.getElementById('send-file').click();"
+        >
     </div>
-    <button id="btnb" type="submit"></button>
+    <button id="send-file" type="submit"></button>
 </form>
-<div class="row row-cols-1">
-    {% for st in model.strings %}
-        {% for line in st.split("\n") %}
-            <div class="col">{{ line }}</div>
-        {% endfor %}
-    {% endfor %}
-</div>
 {% endblock %}

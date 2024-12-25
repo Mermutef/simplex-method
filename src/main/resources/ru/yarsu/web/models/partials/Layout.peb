@@ -14,7 +14,7 @@
 
 <nav class="navbar sticky-top navbar-expand-lg bg-{% block menuColor %}primary{% endblock %}" data-bs-theme="dark">
     <div class="container">
-        <a class="navbar-brand" href="/">ЛабаМО</a>
+        <a class="navbar-brand underline" href="/">ЛабаМО</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
@@ -25,7 +25,7 @@
             {% endblock %}
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link"
+                    <a class="nav-link underline"
                        href="/kill"
                        target="_self">Убить</a>
                 </li>
@@ -39,5 +39,6 @@
     <div class="my-4">{% block pageInner %}<p><b>Тело</b>{{ model.description }}</p>{% endblock %}</div>
 </div>
 <script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/task-manager.js"></script>
 </body>
 </html>

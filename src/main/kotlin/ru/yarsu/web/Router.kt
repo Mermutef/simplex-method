@@ -1,7 +1,6 @@
 package ru.yarsu.web
 
 import org.http4k.core.Method
-import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.with
@@ -10,7 +9,6 @@ import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.template.ViewModel
-import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.handlers.HandlersContainer
 
 fun router(handlers: HandlersContainer): RoutingHttpHandler =
