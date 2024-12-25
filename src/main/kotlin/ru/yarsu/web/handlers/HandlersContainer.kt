@@ -8,7 +8,7 @@ class HandlersContainer(
     mapper: ObjectMapper,
 ) {
     val home = HomeHandler(contextTools.render)
-    val postHome = LoadFromFile(contextTools.render, mapper)
+    val runCalculating = RunCalculatingHandler(contextTools.render)
     val loadFromFile = LoadFromFile(contextTools.render, mapper)
     val kill = KillHandler()
     val ping = PingHandler()
