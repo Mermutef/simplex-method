@@ -269,16 +269,10 @@ function loadMatrix() {
 
     let matrixHeader = document.getElementById("matrix-header");
     matrixHeader.innerHTML = "";
-    let indices = JSON.parse(document.getElementById("basisJson").value);
-    indices.push.apply(
-        indices,
-        JSON.parse(document.getElementById("freeJson").value)
-    );
-    console.log(indices);
     for (let i = 0; i < matrixIndices[0].length - 1; ++i) {
         let newColumnHeaderMatrix = document.createElement("th");
         newColumnHeaderMatrix.setAttribute("scope", "col");
-        newColumnHeaderMatrix.innerText = `x${indices[i] + 1}`;
+        newColumnHeaderMatrix.innerText = `x${i + 1}`;
         matrixHeader.append(newColumnHeaderMatrix);
     }
     let newColumnHeaderMatrix = document.createElement("th");
