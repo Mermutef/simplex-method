@@ -43,30 +43,30 @@ class RunCalculatingHandler(
         println()
         val n = matrixCoefficients.first().size
         val m = matrixCoefficients.size
-//        val matrix = Matrix(
-//            m = m,
-//            n = n,
-//            coefficients = matrixCoefficients,
-//            basis = basis,
-//            free = free,
-//        )
+        val matrix = Matrix(
+            m = m,
+            n = n,
+            coefficients = matrixCoefficients,
+            basis = basis,
+            free = free,
+        )
         val function = Function(coefficients = functionCoefficients)
-//        when (method) {
-//            Method.SIMPLEX_METHOD -> {
-//                SimplexTable(
-//                    matrix = matrix,
-//                    function = function,
-//                    taskType = taskType,
-//                ).let { println(it) }
-//            }
-//
-//            Method.SYNTHETIC_BASIS -> {
-//                SyntheticBasis(
-//                    matrix = matrix,
-//                    function = function,
-//                ).let { println(it) }
-//            }
-//        }
+        when (method) {
+            Method.SIMPLEX_METHOD -> {
+                SimplexTable(
+                    matrix = matrix.straightRunning().reverseRunning(),
+                    function = function,
+                    taskType = taskType,
+                ).let { println(it) }
+            }
+
+            Method.SYNTHETIC_BASIS -> {
+                SyntheticBasis(
+                    matrix = matrix,
+                    function = function,
+                ).let { println(it) }
+            }
+        }
 
         return render(request) draw HomePageVM(form = form)
     }
