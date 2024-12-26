@@ -12,16 +12,13 @@ import org.http4k.lens.MultipartForm
 import org.http4k.lens.MultipartFormFile
 import org.http4k.lens.Validator
 import org.http4k.lens.WebForm
-import org.http4k.lens.map
 import org.http4k.lens.multipartForm
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.nonEmptyString
-import org.http4k.lens.string
 import org.http4k.lens.webForm
-import ru.yarsu.entities.Fraction
-import ru.yarsu.entities.Fraction.Companion.toFraction
-import ru.yarsu.entities.TaskType
-import ru.yarsu.simplex.Method
+import ru.yarsu.domain.entities.Fraction.Companion.toFraction
+import ru.yarsu.domain.entities.TaskType
+import ru.yarsu.domain.simplex.Method
 
 private val jmapper = jacksonObjectMapper()
 

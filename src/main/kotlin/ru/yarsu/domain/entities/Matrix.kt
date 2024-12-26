@@ -1,4 +1,4 @@
-package ru.yarsu.entities
+package ru.yarsu.domain.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 

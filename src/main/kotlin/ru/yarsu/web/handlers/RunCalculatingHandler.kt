@@ -3,11 +3,11 @@ package ru.yarsu.web.handlers
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
-import ru.yarsu.entities.Function
-import ru.yarsu.entities.Matrix
-import ru.yarsu.simplex.Method
-import ru.yarsu.simplex.SimplexTable
-import ru.yarsu.simplex.SyntheticBasis
+import ru.yarsu.domain.entities.Function
+import ru.yarsu.domain.entities.Matrix
+import ru.yarsu.domain.simplex.Method
+import ru.yarsu.domain.simplex.SimplexTable
+import ru.yarsu.domain.simplex.SyntheticBasis
 import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.draw
 import ru.yarsu.web.lenses.SimplexFormLenses.basisField
@@ -34,27 +34,22 @@ class RunCalculatingHandler(
         val functionCoefficients = functionField(form)
         val taskType = taskTypeField(form)
         val method = methodField(form)
-        println(basis)
-        println(free)
-        println(matrixCoefficients)
-        println(functionCoefficients)
-        println(taskType)
-        println(method)
-        println()
         val n = matrixCoefficients.first().size
         val m = matrixCoefficients.size
+        val defaultBasis = (0..<m).toList()
+        val defaultFree = (m..<n - 1).toList()
         val matrix = Matrix(
             m = m,
             n = n,
             coefficients = matrixCoefficients,
-            basis = basis,
-            free = free,
+            basis = defaultBasis,
+            free = defaultFree,
         )
         val function = Function(coefficients = functionCoefficients)
         when (method) {
             Method.SIMPLEX_METHOD -> {
                 SimplexTable(
-                    matrix = matrix.straightRunning().reverseRunning(),
+                    matrix = matrix.inBasis(newBasis = basis, newFree = free).straightRunning().reverseRunning(),
                     function = function,
                     taskType = taskType,
                 ).let { println(it) }
@@ -69,5 +64,9 @@ class RunCalculatingHandler(
         }
 
         return render(request) draw HomePageVM(form = form)
+    }
+
+    private fun calculateAnswer(): List<SimplexTable> {
+        return emptyList()
     }
 }

@@ -1,6 +1,6 @@
 package ru.yarsu.web.context.templates
 
-import ru.yarsu.config.WebConfig
+import ru.yarsu.domain.config.WebConfig
 
 const val TEMPLATES_DIR = "src/main/resources"
 

@@ -1,7 +1,7 @@
-package ru.yarsu.entities
+package ru.yarsu.domain.entities
 
-import ru.yarsu.entities.Matrix.Companion.plus
-import ru.yarsu.entities.Matrix.Companion.times
+import ru.yarsu.domain.entities.Matrix.Companion.plus
+import ru.yarsu.domain.entities.Matrix.Companion.times
 
 class Function(
     val coefficients: List<Fraction>,

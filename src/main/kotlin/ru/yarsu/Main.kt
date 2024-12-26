@@ -2,23 +2,19 @@ package ru.yarsu
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.http4k.core.then
 import org.http4k.filter.ServerFilters
 import org.http4k.routing.ResourceLoader
-import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Netty
 import org.http4k.server.asServer
-import ru.yarsu.config.AppConfig
-import ru.yarsu.simplex.SimplexTable
+import ru.yarsu.domain.config.AppConfig
 import ru.yarsu.web.context.ContextTools
 import ru.yarsu.web.filters.NotFoundFilter
 import ru.yarsu.web.handlers.HandlersContainer
 import ru.yarsu.web.router
 import java.awt.Desktop
-import java.io.File
 import java.net.URI
 
 fun openInBrowser(uri: URI?): Boolean {

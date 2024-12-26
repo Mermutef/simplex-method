@@ -7,9 +7,8 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.with
 import org.http4k.lens.WebForm
-import ru.yarsu.entities.TaskType
-import ru.yarsu.simplex.Method
-import ru.yarsu.simplex.SimplexTable
+import ru.yarsu.domain.simplex.Method
+import ru.yarsu.domain.simplex.SimplexTable
 import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.draw
 import ru.yarsu.web.lenses.SimplexFormLenses.basisField

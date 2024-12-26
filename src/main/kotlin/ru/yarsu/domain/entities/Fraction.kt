@@ -1,4 +1,4 @@
-package ru.yarsu.entities
+package ru.yarsu.domain.entities
 
 import java.math.BigInteger
 import kotlin.math.abs

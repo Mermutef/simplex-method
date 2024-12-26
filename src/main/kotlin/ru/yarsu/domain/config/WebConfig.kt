@@ -1,4 +1,4 @@
-package ru.yarsu.config
+package ru.yarsu.domain.config
 
 import org.http4k.config.Environment
 import org.http4k.config.EnvironmentKey

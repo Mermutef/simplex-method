@@ -1,10 +1,10 @@
-package ru.yarsu.simplex
+package ru.yarsu.domain.simplex
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import ru.yarsu.entities.Fraction
-import ru.yarsu.entities.Function
-import ru.yarsu.entities.Matrix
-import ru.yarsu.entities.Matrix.Companion.unaryMinus
+import ru.yarsu.domain.entities.Fraction
+import ru.yarsu.domain.entities.Function
+import ru.yarsu.domain.entities.Matrix
+import ru.yarsu.domain.entities.Matrix.Companion.unaryMinus
 
 class SyntheticBasis(
     val matrix: Matrix,
