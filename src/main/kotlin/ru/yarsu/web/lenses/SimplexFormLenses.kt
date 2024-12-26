@@ -86,10 +86,10 @@ object SimplexFormLenses {
         .map(
             { fromForm ->
                 runCatching {
-                    jmapper.readValue<List<String>>(fromForm).map { it.toInt() }
+                    jmapper.readValue<List<Int>>(fromForm)
                 }.getOrElse { throw IllegalArgumentException("") }
             },
-            { toForm -> jmapper.writeValueAsString(toForm.map { it.toString() }) }
+            { toForm -> jmapper.writeValueAsString(toForm) }
         ).required("freeJson")
 
     val basisField = FormField
@@ -98,10 +98,10 @@ object SimplexFormLenses {
         .map(
             { fromForm ->
                 runCatching {
-                    jmapper.readValue<List<String>>(fromForm).map { it.toInt() }
+                    jmapper.readValue<List<Int>>(fromForm)
                 }.getOrElse { throw IllegalArgumentException("") }
             },
-            { toForm -> jmapper.writeValueAsString(toForm.map { it.toString() }) }
+            { toForm -> jmapper.writeValueAsString(toForm) }
         ).required("basisJson")
 
     val inputFreeField = FormField.optional("inputFree")

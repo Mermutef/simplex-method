@@ -190,7 +190,7 @@ function prepareBasis() {
     let basisInputs = document.getElementsByName("basis");
     let basisIndices = [];
     for (let i = 0; i < basisInputs.length; ++i) {
-        basisIndices.push(basisInputs[i].value);
+        basisIndices.push(Number(basisInputs[i].value));
     }
     document.getElementById("basisJson").value = JSON.stringify(basisIndices);
 }
@@ -201,7 +201,7 @@ function prepareFree() {
         let freeInputs = document.getElementsByName("free");
         let freeIndices = [];
         for (let i = 0; i < freeInputs.length; ++i) {
-            freeIndices.push(freeInputs[i].value);
+            freeIndices.push(Number(freeInputs[i].value));
         }
         document.getElementById("freeJson").value = JSON.stringify(freeIndices);
     } else {
@@ -217,3 +217,97 @@ function processFree() {
         document.getElementById("freeTable").removeAttribute("hidden");
     }
 }
+
+function loadData() {
+    loadBasis();
+    loadFree();
+    loadMatrix();
+    loadFunction();
+}
+
+function loadBasis() {
+    let basisIndices = JSON.parse(document.getElementById("basisJson").value);
+    let basisField = document.getElementById("basis-coefficients");
+    basisField.innerHTML = "";
+    for (let i = 0; i < basisIndices.length; ++i) {
+        let basisIdx = basisIndices[i];
+        let newCell = document.createElement("td");
+        newCell.innerHTML = basisTemplate;
+        newCell.getElementsByTagName("input")[0].value = basisIdx;
+        basisField.append(newCell);
+    }
+}
+
+function loadFree() {
+    let freeIndices = JSON.parse(document.getElementById("freeJson").value);
+    let freeField = document.getElementById("free-coefficients");
+    freeField.innerHTML = "";
+    for (let i = 0; i < freeIndices.length; ++i) {
+        let freeIdx = freeIndices[i];
+        let newCell = document.createElement("td");
+        newCell.innerHTML = freeTemplate;
+        newCell.getElementsByTagName("input")[0].value = freeIdx;
+        freeField.append(newCell);
+    }
+}
+
+function loadMatrix() {
+    let matrixIndices = JSON.parse(document.getElementById("matrixJson").value);
+    let matrixRows = document.getElementById("matrix-rows");
+    matrixRows.innerHTML = "";
+    for (let i = 0; i < matrixIndices.length; ++i) {
+        let newRow = document.createElement("tr");
+        for (let j = 0; j < matrixIndices[0].length; ++j) {
+            let matrixIdx = matrixIndices[i][j];
+            let newCell = document.createElement("td");
+            newCell.innerHTML = cellTemplate;
+            newCell.getElementsByTagName("input")[0].value = matrixIdx;
+            newRow.append(newCell);
+        }
+        matrixRows.append(newRow);
+    }
+
+    let matrixHeader = document.getElementById("matrix-header");
+    matrixHeader.innerHTML = "";
+    for (let i = 0; i < matrixIndices.length - 1; ++i) {
+        let newColumnHeaderMatrix = document.createElement("th");
+        newColumnHeaderMatrix.setAttribute("scope", "col");
+        newColumnHeaderMatrix.innerText = `x${i + 1}`;
+        matrixHeader.append(newColumnHeaderMatrix);
+    }
+    let newColumnHeaderMatrix = document.createElement("th");
+    newColumnHeaderMatrix.setAttribute("scope", "col");
+    newColumnHeaderMatrix.innerText = `b`;
+    matrixHeader.append(newColumnHeaderMatrix);
+}
+
+function loadFunction() {
+    let functionIndices = JSON.parse(
+        document.getElementById("functionJson").value
+    );
+    let functionCoefficients = document.getElementById("function-coefficients");
+    functionCoefficients.innerHTML = "";
+    for (let i = 0; i < functionIndices.length; ++i) {
+        let functionCoefficient = functionIndices[i];
+        let newCell = document.createElement("td");
+        newCell.innerHTML = cellTemplate;
+        newCell.getElementsByTagName("input")[0].value = functionCoefficient;
+        functionCoefficients.append(newCell);
+    }
+
+    let functionHeader = document.getElementById("function-header");
+    functionHeader.innerHTML = "";
+    for (let i = 0; i < functionIndices.length - 1; ++i) {
+        let newColumnHeaderFunction = document.createElement("th");
+        newColumnHeaderFunction.setAttribute("scope", "col");
+        newColumnHeaderFunction.innerText = `x${i + 1}`;
+        functionHeader.append(newColumnHeaderFunction);
+    }
+    let newColumnHeaderFunction = document.createElement("th");
+    newColumnHeaderFunction.setAttribute("scope", "col");
+    newColumnHeaderFunction.innerText = `b`;
+    functionHeader.append(newColumnHeaderFunction);
+}
+
+processFree();
+loadData();
