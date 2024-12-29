@@ -13,20 +13,27 @@ class Function(
      *
      * @return функция с коэффициентами, выраженными через свободные переменные матрицы
      */
-    fun inBasisOf(matrix: Matrix, taskType: TaskType, doTransform: Boolean = true): Function {
+    fun inBasisOf(
+        matrix: Matrix,
+        taskType: TaskType,
+        doTransform: Boolean = true,
+    ): Function {
         val newCoefficients = mutableListOf<Fraction>()
+        println(coefficients)
         coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction.from(0)) }
+        println(newCoefficients)
+        println()
         matrix.coefficients.mapIndexed { rowIdx, row -> row * coefficients[matrix.basis[rowIdx]] }
             .reduce { row1, row2 -> row1 + row2 }
             .forEachIndexed { idx, pi ->
                 when (val xi = (matrix.fullIndices[idx])) {
-                    in matrix.free -> newCoefficients[xi] = coefficients[xi] - pi
-                    in listOf(matrix.bIdx) -> newCoefficients += coefficients[xi] + pi
+                    in matrix.free -> newCoefficients[xi] = (coefficients[xi] - pi)
+                    in listOf(matrix.bIdx) -> newCoefficients[xi] = (coefficients[xi] + pi)
                     else -> {}
                 }
             }
 
-        return Function(if (taskType == TaskType.MAX && doTransform) coefficients.map { it * -1 } else coefficients)
+        return Function(if (taskType == TaskType.MAX && doTransform) newCoefficients.map { it * -1 } else newCoefficients)
     }
 
     override fun toString(): String {

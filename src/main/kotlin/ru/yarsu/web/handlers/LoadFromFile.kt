@@ -32,15 +32,16 @@ class LoadFromFile(
         if (form.errors.isNotEmpty()) return notFound()
         val json = fileField(form).content
         val initialTable = mapper.readValue<SimplexTable>(json)
-        val resulForm = WebForm().with(
-            matrixField of initialTable.matrix.coefficients.map { it.toList() },
-            functionField of initialTable.function.coefficients,
-            basisField of initialTable.matrix.basis,
-            freeField of initialTable.matrix.free,
-            inputFreeField of "on",
-            methodField of Method.SIMPLEX_METHOD,
-            taskTypeField of initialTable.taskType,
-        )
+        val resulForm =
+            WebForm().with(
+                matrixField of initialTable.matrix.coefficients,
+                functionField of initialTable.function.coefficients,
+                basisField of initialTable.matrix.basis,
+                freeField of initialTable.matrix.free,
+                inputFreeField of "on",
+                methodField of Method.SIMPLEX_METHOD,
+                taskTypeField of initialTable.taskType,
+            )
 
         return render(request) draw HomePageVM(form = resulForm)
     }

@@ -3,6 +3,9 @@ package ru.yarsu.web.handlers
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.core.with
+import org.http4k.lens.WebForm
+import ru.yarsu.db.CurrentTask
 import ru.yarsu.domain.entities.Function
 import ru.yarsu.domain.entities.Matrix
 import ru.yarsu.domain.simplex.Method
@@ -19,6 +22,7 @@ import ru.yarsu.web.lenses.SimplexFormLenses.methodField
 import ru.yarsu.web.lenses.SimplexFormLenses.taskForm
 import ru.yarsu.web.lenses.SimplexFormLenses.taskTypeField
 import ru.yarsu.web.models.HomePageVM
+import ru.yarsu.web.models.partials.SimplexStepPT
 
 class RunCalculatingHandler(
     private val render: ContextAwareViewRender,
@@ -38,13 +42,14 @@ class RunCalculatingHandler(
         val m = matrixCoefficients.size
         val defaultBasis = (0..<m).toList()
         val defaultFree = (m..<n - 1).toList()
-        val matrix = Matrix(
-            m = m,
-            n = n,
-            coefficients = matrixCoefficients,
-            basis = defaultBasis,
-            free = defaultFree,
-        )
+        val matrix =
+            Matrix(
+                m = m,
+                n = n,
+                coefficients = matrixCoefficients,
+                basis = defaultBasis,
+                free = defaultFree,
+            )
         val function = Function(coefficients = functionCoefficients)
         when (method) {
             Method.SIMPLEX_METHOD -> {
@@ -52,21 +57,55 @@ class RunCalculatingHandler(
                     matrix = matrix.inBasis(newBasis = basis, newFree = free).straightRunning().reverseRunning(),
                     function = function,
                     taskType = taskType,
-                ).let { println(it) }
+                )
             }
 
             Method.SYNTHETIC_BASIS -> {
                 SyntheticBasis(
                     matrix = matrix,
                     function = function,
-                ).let { println(it) }
+                )
             }
         }
 
-        return render(request) draw HomePageVM(form = form)
-    }
+        val currentTask =
+            CurrentTask(
+                method = method,
+                taskType = taskType,
+                function = function,
+                matrix = matrix.inBasis(newBasis = basis, newFree = free).straightRunning().reverseRunning(),
+            )
 
-    private fun calculateAnswer(): List<SimplexTable> {
-        return emptyList()
+        currentTask.solve()
+        println("solved")
+
+        val tables = currentTask.simplexTables
+        val replaces = currentTask.replaces
+        val stepsToRender = mutableListOf<Int>()
+        var renderedSteps = ""
+        for (i in 1..<tables.size) {
+            println(tables[i].function.inBasisOf(tables[i].matrix, taskType).coefficients)
+            println("+-+-+-+")
+            println(tables[i].function.coefficients)
+            println("----++++++")
+            val webForm =
+                WebForm().with(
+                    basisField of tables[i].matrix.basis,
+                    freeField of tables[i].matrix.free,
+                    matrixField of tables[i].matrix.coefficients,
+                    functionField of tables[i].function.inBasisOf(tables[i].matrix, taskType).coefficients,
+                )
+            renderedSteps += (render(request) draw
+                    SimplexStepPT(
+                        stepIdx = i,
+                        stepForm = webForm,
+                    )).body
+        }
+        return render(request) draw
+                HomePageVM(
+                    form = form,
+                    renderedSteps = renderedSteps,
+                    stepsToRender = (1..<tables.size).toList(),
+                )
     }
 }

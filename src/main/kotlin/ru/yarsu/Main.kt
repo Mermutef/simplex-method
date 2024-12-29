@@ -13,6 +13,7 @@ import ru.yarsu.domain.config.AppConfig
 import ru.yarsu.web.context.ContextTools
 import ru.yarsu.web.filters.NotFoundFilter
 import ru.yarsu.web.handlers.HandlersContainer
+import ru.yarsu.web.notFound
 import ru.yarsu.web.router
 import java.awt.Desktop
 import java.net.URI
@@ -32,10 +33,14 @@ fun main() {
     val appWithStaticResources =
         ServerFilters.InitialiseRequestContext(contextTools.appContexts)
             .then(NotFoundFilter(contextTools.render))
+            .then(ServerFilters.CatchAll {
+                it.printStackTrace()
+                notFound()
+            })
             .then(
                 routes(
                     router(HandlersContainer(contextTools, mapper)),
-                    static(ResourceLoader.Classpath("/ru/yarsu/public"))
+                    static(ResourceLoader.Classpath("/ru/yarsu/public")),
                 ),
             )
     val server = appWithStaticResources.asServer(Netty(appConfig.webConfig.webPort)).start()

@@ -37,7 +37,6 @@ class SimplexTable(
     val functionValue: Fraction
         get() = function.inBasisOf(matrix, taskType).coefficients.last()
 
-
     /**
      * Очередной шаг симплекс-метода
      *

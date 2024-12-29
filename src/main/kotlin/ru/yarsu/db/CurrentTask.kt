@@ -1,6 +1,5 @@
 package ru.yarsu.db
 
-import ru.yarsu.domain.entities.Fraction
 import ru.yarsu.domain.entities.Function
 import ru.yarsu.domain.entities.Matrix
 import ru.yarsu.domain.entities.TaskType
@@ -12,7 +11,7 @@ class CurrentTask(
     val method: Method,
     val matrix: Matrix,
     val function: Function,
-    val taskType: TaskType
+    val taskType: TaskType,
 ) {
     val simplexTables = mutableListOf<SimplexTable>()
     val replaces = mutableMapOf<Int, Pair<Int, Int>>()
@@ -27,15 +26,16 @@ class CurrentTask(
                         matrix = matrix,
                         function = function,
                         taskType = taskType,
-                    )
+                    ),
                 )
             }
 
             Method.SYNTHETIC_BASIS -> {
-                syntheticBasis = SyntheticBasis(
-                    matrix = matrix,
-                    function = function,
-                )
+                syntheticBasis =
+                    SyntheticBasis(
+                        matrix = matrix,
+                        function = function,
+                    )
                 simplexTables.add(syntheticBasis.startTable)
             }
         }
@@ -43,9 +43,13 @@ class CurrentTask(
 
     fun solve() {
         while (true) {
+            println("/-/-/-/-/-/-/-/-/")
+            println(simplexTables.last().function.inBasisOf(simplexTables.last().matrix, taskType).coefficients)
             val possibleValues = simplexTables.last().possibleReplaces()?.first() ?: break
+            println(possibleValues)
             replaces[simplexTables.size] = possibleValues
             simplexTables.add(simplexTables.last() changeBasisBy possibleValues)
+            println(simplexTables.last())
         }
     }
 

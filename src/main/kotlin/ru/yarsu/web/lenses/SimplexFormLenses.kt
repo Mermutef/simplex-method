@@ -41,84 +41,94 @@ object SimplexFormLenses {
                 { toForm: TaskType -> toForm.toString().lowercase().replace("_", "-") },
             ).required("task-type")
 
-    val matrixField = FormField
-        .nonBlankString()
-        .nonEmptyString()
-        .map(
-            { fromForm ->
-                runCatching {
-                    jmapper.readValue<Array<Array<String>>>(fromForm).map {
-                        it.map { aij -> aij.toFraction() }
-                    }
-                }.getOrElse { throw IllegalArgumentException("") }
-            },
-            { toForm ->
-                jmapper.writeValueAsString(toForm.map {
-                    it.map { aij -> aij.toString() }
-                })
-            }
-        ).required("matrixJson")
+    val matrixField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm ->
+                    runCatching {
+                        jmapper.readValue<Array<Array<String>>>(fromForm).map {
+                            it.map { aij -> aij.toFraction() }.toTypedArray()
+                        }.toTypedArray()
+                    }.getOrElse { throw IllegalArgumentException("") }
+                },
+                { toForm ->
+                    jmapper.writeValueAsString(
+                        toForm.map {
+                            it.map { aij -> aij.toString() }
+                        },
+                    )
+                },
+            ).required("matrixJson")
 
-    val functionField = FormField
-        .nonBlankString()
-        .nonEmptyString()
-        .map(
-            { fromForm ->
-                runCatching {
-                    jmapper.readValue<List<String>>(fromForm).map {
-                        it.toFraction()
-                    }
-                }.getOrElse { throw IllegalArgumentException("") }
-            },
-            { toForm ->
-                jmapper.writeValueAsString(toForm.map {
-                    it.toString()
-                })
-            }
-        ).required("functionJson")
+    val functionField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm ->
+                    runCatching {
+                        jmapper.readValue<List<String>>(fromForm).map {
+                            it.toFraction()
+                        }
+                    }.getOrElse { throw IllegalArgumentException("") }
+                },
+                { toForm ->
+                    jmapper.writeValueAsString(
+                        toForm.map {
+                            it.toString()
+                        },
+                    )
+                },
+            ).required("functionJson")
 
-    val freeField = FormField
-        .nonBlankString()
-        .nonEmptyString()
-        .map(
-            { fromForm ->
-                runCatching {
-                    jmapper.readValue<List<Int>>(fromForm)
-                }.getOrElse { throw IllegalArgumentException("") }
-            },
-            { toForm -> jmapper.writeValueAsString(toForm) }
-        ).required("freeJson")
+    val freeField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm ->
+                    runCatching {
+                        jmapper.readValue<List<Int>>(fromForm)
+                    }.getOrElse { throw IllegalArgumentException("") }
+                },
+                { toForm -> jmapper.writeValueAsString(toForm) },
+            ).required("freeJson")
 
-    val basisField = FormField
-        .nonBlankString()
-        .nonEmptyString()
-        .map(
-            { fromForm ->
-                runCatching {
-                    jmapper.readValue<List<Int>>(fromForm)
-                }.getOrElse { throw IllegalArgumentException("") }
-            },
-            { toForm -> jmapper.writeValueAsString(toForm) }
-        ).required("basisJson")
+    val basisField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm ->
+                    runCatching {
+                        jmapper.readValue<List<Int>>(fromForm)
+                    }.getOrElse { throw IllegalArgumentException("") }
+                },
+                { toForm -> jmapper.writeValueAsString(toForm) },
+            ).required("basisJson")
 
     val inputFreeField = FormField.optional("inputFree")
 
-    val taskForm = Body.webForm(
-        Validator.Feedback,
-        methodField,
-        taskTypeField,
-        matrixField,
-        functionField,
-        freeField,
-        basisField,
-        inputFreeField,
-    ).toLens()
+    val taskForm =
+        Body.webForm(
+            Validator.Feedback,
+            methodField,
+            taskTypeField,
+            matrixField,
+            functionField,
+            freeField,
+            basisField,
+            inputFreeField,
+        ).toLens()
 
     val fileField = MultipartFormFile.required("file")
 
     val fileForm = Body.multipartForm(Validator.Feedback, fileField).toLens()
 
     infix fun BiDiBodyLens<WebForm>.from(request: Request) = this(request)
+
     infix fun BiDiBodyLens<MultipartForm>.from(request: Request) = this(request)
 
     fun <IN : Any, OUT> lensOrNull(

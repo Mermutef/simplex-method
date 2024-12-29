@@ -40,5 +40,6 @@
 </div>
 <script src="/js/bootstrap.bundle.min.js"></script>
 <script src="/js/task-manager.js"></script>
+<script src="/js/render-steps.js"></script>
 </body>
 </html>

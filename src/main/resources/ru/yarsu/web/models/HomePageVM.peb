@@ -187,6 +187,9 @@
         </form>
     </div>
 </div>
+<div id="rendered-steps">
+    {{ model.renderedSteps | raw }}
+</div>
 <form method="post" enctype="multipart/form-data" action="/load-from-file" hidden>
     <div class="col mb-3">
         <input type="file"
@@ -198,4 +201,8 @@
     </div>
     <button id="send-file" type="submit"></button>
 </form>
+    <script>
+        var stepsToRender = {{ model.stepsToRender }};
+        console.log(stepsToRender);
+    </script>
 {% endblock %}

@@ -223,23 +223,24 @@ function parseJsonField(fieldid) {
 }
 
 function getAndClearField(fieldId) {
+    console.log(fieldId);
     let field = document.getElementById(fieldId);
     field.innerHTML = "";
     return field;
 }
 
 function loadData() {
-    loadIndices("basisJson", "basis-coefficients");
-    loadIndices("freeJson", "free-coefficients");
+    loadIndices("basisJson", "basis-coefficients", basisTemplate);
+    loadIndices("freeJson", "free-coefficients", freeTemplate);
     loadMatrix();
     loadFunction();
 }
 
-function loadIndices(jsonFieldId, indecesFieldId) {
+function loadIndices(jsonFieldId, indecesFieldId, template) {
     let indices = parseJsonField(jsonFieldId);
     let field = getAndClearField(indecesFieldId);
     for (let i = 0; i < indices.length; ++i) {
-        field.append(createCell(basisTemplate, indices[i]));
+        field.append(createCell(template, indices[i]));
     }
 }
 

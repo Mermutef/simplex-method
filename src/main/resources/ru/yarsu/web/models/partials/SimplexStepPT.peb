@@ -1,0 +1,71 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.partials.SimplexStepPT" #}
+<div class="row mt-3">
+    <div class="col">
+        <h4>Шаг {{ model.stepIdx }}</h4>
+        <table id="function-{{ model.stepIdx }}" class="table table-bordered table-sm text-center align-middle">
+            <thead>
+            <tr id="function-header-{{ model.stepIdx }}">
+                <th scope="col">x1</th>
+                <th scope="col">x2</th>
+                <th scope="col">x3</th>
+                <th scope="col">x4</th>
+                <th scope="col">b</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr id="function-coefficients-{{ model.stepIdx }}">
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table id="matrix-{{ model.stepIdx }}" class="table table-bordered table-sm text-center align-middle">
+            <thead>
+            <tr id="matrix-header-{{ model.stepIdx }}"> <!--свободные переменные-->
+                <th scope="col">x1</th>
+                <th scope="col">x2</th>
+                <th scope="col">x3</th>
+                <th scope="col">x4</th>
+                <th scope="col">b</th>
+            </tr>
+            </thead>
+            <tbody id="matrix-rows-{{ model.stepIdx }}">
+            <tr>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+            </tr>
+            <tr>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+                <td><input class="form-control" type="text" value="0"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="col-1">
+                <label for="sIdx">Вводим x</label>
+            </div>
+            <div class="col">
+                <input type="number" min="0" id="sIdx"  class="form-control">
+            </div>
+            <div class="col-1">
+                <label for="rIdx">Выводим x</label>
+            </div>
+            <div class="col">
+                <input type="number" min="0" id="rIdx" class="form-control">
+            </div>
+        </div>
+        <textarea id="matrixJson-{{ model.stepIdx }}">{{ model.stepForm.fields["matrixJson"].first() }}</textarea>
+        <textarea id="functionJson-{{ model.stepIdx }}">{{ model.stepForm.fields["functionJson"].first() }}</textarea>
+        <textarea id="basisJson-{{ model.stepIdx }}">{{ model.stepForm.fields["basisJson"].first() }}</textarea>
+        <textarea id="freeJson-{{ model.stepIdx }}">{{ model.stepForm.fields["freeJson"].first() }}</textarea>
+    </div>
+</div>

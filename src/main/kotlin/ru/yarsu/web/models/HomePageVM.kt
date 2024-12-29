@@ -5,4 +5,6 @@ import org.http4k.template.ViewModel
 
 class HomePageVM(
     val form: WebForm? = null,
+    val renderedSteps: String = "",
+    val stepsToRender: List<Int> = emptyList(),
 ) : ViewModel
