@@ -19,10 +19,7 @@ class Function(
         doTransform: Boolean = true,
     ): Function {
         val newCoefficients = mutableListOf<Fraction>()
-        println(coefficients)
         coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction.from(0)) }
-        println(newCoefficients)
-        println()
         matrix.coefficients.mapIndexed { rowIdx, row -> row * coefficients[matrix.basis[rowIdx]] }
             .reduce { row1, row2 -> row1 + row2 }
             .forEachIndexed { idx, pi ->

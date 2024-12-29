@@ -77,17 +77,13 @@ class RunCalculatingHandler(
             )
 
         currentTask.solve()
-        println("solved")
 
         val tables = currentTask.simplexTables
         val replaces = currentTask.replaces
-        val stepsToRender = mutableListOf<Int>()
+        println(replaces)
         var renderedSteps = ""
-        for (i in 1..<tables.size) {
-            println(tables[i].function.inBasisOf(tables[i].matrix, taskType).coefficients)
-            println("+-+-+-+")
-            println(tables[i].function.coefficients)
-            println("----++++++")
+        val steps = mutableListOf<Triple<Int, Int, Int>>()
+        for (i in 0..<tables.size - 1) {
             val webForm =
                 WebForm().with(
                     basisField of tables[i].matrix.basis,
@@ -100,12 +96,26 @@ class RunCalculatingHandler(
                         stepIdx = i,
                         stepForm = webForm,
                     )).body
+            steps.add(Triple(i, replaces[i + 1]!!.first, replaces[i + 1]!!.second))
         }
+        val webForm =
+            WebForm().with(
+                basisField of tables.last().matrix.basis,
+                freeField of tables.last().matrix.free,
+                matrixField of tables.last().matrix.coefficients,
+                functionField of tables.last().function.inBasisOf(tables.last().matrix, taskType).coefficients,
+            )
+        renderedSteps += (render(request) draw
+                SimplexStepPT(
+                    stepIdx = tables.size-1,
+                    stepForm = webForm,
+                )).body
+        steps.add(Triple(tables.size-1, -1, -1))
         return render(request) draw
                 HomePageVM(
                     form = form,
                     renderedSteps = renderedSteps,
-                    stepsToRender = (1..<tables.size).toList(),
+                    stepsToRender = steps,
                 )
     }
 }

@@ -43,13 +43,9 @@ class CurrentTask(
 
     fun solve() {
         while (true) {
-            println("/-/-/-/-/-/-/-/-/")
-            println(simplexTables.last().function.inBasisOf(simplexTables.last().matrix, taskType).coefficients)
             val possibleValues = simplexTables.last().possibleReplaces()?.first() ?: break
-            println(possibleValues)
             replaces[simplexTables.size] = possibleValues
             simplexTables.add(simplexTables.last() changeBasisBy possibleValues)
-            println(simplexTables.last())
         }
     }
 

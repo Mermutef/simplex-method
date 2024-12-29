@@ -120,6 +120,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <h1>Решение</h1>
+                    {{ model.renderedSteps | raw }}
                 </div>
                 <div class="col-3">
                     <div class="col mb-3">
@@ -173,11 +175,11 @@
                         >Ввести индексы свободных переменных
                         </label>
                     </div>
-                    <textarea name="matrixJson" id="matrixJson">{{ model.form.fields["matrixJson"].first() }}</textarea>
-                    <textarea name="functionJson" id="functionJson">{{ model.form.fields["functionJson"].first() }}</textarea>
-                    <textarea name="basisJson" id="basisJson">{{ model.form.fields["basisJson"].first() }}</textarea>
-                    <textarea name="freeJson" id="freeJson">{{ model.form.fields["freeJson"].first() }}</textarea>
-                    <button class="btn btn-outline-primary underline"
+                    <textarea name="matrixJson" id="matrixJson" hidden="hidden">{{ model.form.fields["matrixJson"].first() }}</textarea>
+                    <textarea name="functionJson" id="functionJson" hidden="hidden">{{ model.form.fields["functionJson"].first() }}</textarea>
+                    <textarea name="basisJson" id="basisJson" hidden="hidden">{{ model.form.fields["basisJson"].first() }}</textarea>
+                    <textarea name="freeJson" id="freeJson" hidden="hidden">{{ model.form.fields["freeJson"].first() }}</textarea>
+                    <button class="btn btn-outline-primary underline mt-2"
                             onclick="prepareData();"
                             type="button">Вычислить
                     </button>
@@ -186,9 +188,6 @@
             </div>
         </form>
     </div>
-</div>
-<div id="rendered-steps">
-    {{ model.renderedSteps | raw }}
 </div>
 <form method="post" enctype="multipart/form-data" action="/load-from-file" hidden>
     <div class="col mb-3">
@@ -202,7 +201,7 @@
     <button id="send-file" type="submit"></button>
 </form>
     <script>
-        var stepsToRender = {{ model.stepsToRender }};
+        var stepsToRender = {{ model.jsObject }};
         console.log(stepsToRender);
     </script>
 {% endblock %}
