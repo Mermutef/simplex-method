@@ -15,6 +15,8 @@ fun router(handlers: HandlersContainer): RoutingHttpHandler =
     routes(
         "/" bind Method.GET to handlers.home,
         "/" bind Method.POST to handlers.solveCalculating,
+        "/next" bind Method.POST to handlers.nextStep,
+        "/previous" bind Method.POST to handlers.previousStep,
         "/load-from-file" bind Method.POST to handlers.loadFromFile,
         "/save-to-file" bind Method.POST to handlers.saveToFile,
         "/ping" bind Method.GET to handlers.ping,

@@ -77,7 +77,6 @@ class SimplexTable(
         matrix.free.filter { idx ->
             functionInBasis.coefficients[idx] < 0
         }.forEach { s ->
-            println(functionInBasis.coefficients[s])
             val sIdx = matrix.fullIndices.indexOf(s)
             val candidates = mutableListOf<Triple<Fraction, Int, Int>>()
             matrix.basis.forEach { r ->

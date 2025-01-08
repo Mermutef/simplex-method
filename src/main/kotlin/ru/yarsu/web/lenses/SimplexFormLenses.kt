@@ -123,10 +123,7 @@ object SimplexFormLenses {
                 { toForm: CurrentTask? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
             ).optional("currentTaskJson")
 
-    val modeField =
-        FormField
-            .string()
-            .optional("stepByStep")
+    val modeField = FormField.optional("stepByStep")
 
     val taskForm =
         Body.webForm(

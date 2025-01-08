@@ -85,8 +85,6 @@ class SyntheticBasis(
 
 //        val needlessMatrixRows
 
-        println(lastTable.matrix.basis)
-        println(lastTable.matrix.free.filter { it !in basis })
         return SimplexTable(
             matrix =
                 Matrix(

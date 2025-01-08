@@ -111,6 +111,8 @@
                             {% if model.renderedSteps is not empty %}
                             <h1>Решение</h1>
                             {{ model.renderedSteps | raw }}
+                            <button type="button" onclick="document.getElementById('taskForm').setAttribute('action', '/previous'); prepareData();">Назад</button>
+                            <button type="button" onclick="document.getElementById('taskForm').setAttribute('action', '/next'); prepareData();">Вперед</button>
                             {% endif %}
                     </div>
                 </div>

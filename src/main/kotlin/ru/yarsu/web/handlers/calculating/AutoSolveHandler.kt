@@ -18,12 +18,13 @@ import ru.yarsu.web.lenses.SimplexFormLenses.from
 import ru.yarsu.web.lenses.SimplexFormLenses.functionField
 import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
 import ru.yarsu.web.lenses.SimplexFormLenses.methodField
+import ru.yarsu.web.lenses.SimplexFormLenses.modeField
 import ru.yarsu.web.lenses.SimplexFormLenses.taskForm
 import ru.yarsu.web.lenses.SimplexFormLenses.taskTypeField
 import ru.yarsu.web.models.common.HomePageVM
 import ru.yarsu.web.models.part.SimplexStepPT
 
-class SolveHandler(
+class AutoSolveHandler(
     private val render: ContextAwareViewRender,
 ) : HttpHandler {
     override fun invoke(request: Request): Response {
@@ -51,19 +52,20 @@ class SolveHandler(
             )
         val function = Function(coefficients = functionCoefficients)
 
-        println(matrix)
-        val currentTask =
-            currentTaskField(form) ?: CurrentTask(
-                method = method,
-                taskType = taskType,
-                function = function,
-                matrix =
-                    takeIf { method == Method.SIMPLEX_METHOD }?.let {
-                        matrix.solveGauss(withBasis = basis)
-                    } ?: matrix,
-            )
+        val currentTask = CurrentTask(
+            method = method,
+            taskType = taskType,
+            function = function,
+            matrix =
+                takeIf { method == Method.SIMPLEX_METHOD }?.let {
+                    matrix.solveGauss(withBasis = basis)
+                } ?: matrix,
+        )
 
-        currentTask.solve()
+        println(modeField(form))
+        if (modeField(form) == null) {
+            currentTask.solve()
+        }
 
         var renderedSteps = ""
         val syntheticSteps = mutableListOf<Triple<Int, Int, Int>>()
@@ -78,14 +80,14 @@ class SolveHandler(
                 )
             renderedSteps +=
                 (
-                    render(request) draw
-                        SimplexStepPT(
-                            stepIdx = i,
-                            stepForm = webForm,
-                            isLast = i == currentTask.syntheticSimplexTables.lastIndex,
-                            isSyntheticBasisStep = true,
-                        )
-                ).body
+                        render(request) draw
+                                SimplexStepPT(
+                                    stepIdx = i,
+                                    stepForm = webForm,
+                                    isLast = i == currentTask.syntheticSimplexTables.lastIndex,
+                                    isSyntheticBasisStep = true,
+                                )
+                        ).body
             syntheticSteps.add(
                 if (i != currentTask.syntheticSimplexTables.lastIndex) {
                     Triple(i, currentTask.syntheticReplaces[i]!!.first, currentTask.syntheticReplaces[i]!!.second)
@@ -105,13 +107,13 @@ class SolveHandler(
                 )
             renderedSteps +=
                 (
-                    render(request) draw
-                        SimplexStepPT(
-                            stepIdx = i,
-                            stepForm = webForm,
-                            isLast = i == currentTask.simplexTables.lastIndex,
-                        )
-                ).body
+                        render(request) draw
+                                SimplexStepPT(
+                                    stepIdx = i,
+                                    stepForm = webForm,
+                                    isLast = i == currentTask.simplexTables.lastIndex,
+                                )
+                        ).body
             trueSteps.add(
                 if (i != currentTask.simplexTables.lastIndex) {
                     Triple(i, currentTask.simplexReplaces[i]!!.first, currentTask.simplexReplaces[i]!!.second)
@@ -121,22 +123,22 @@ class SolveHandler(
             )
         }
         return render(request) draw
-            HomePageVM(
-                form =
-                    form
-                        .minus("currentTaskJson")
-                        .with(currentTaskField of currentTask)
-                        .with(freeField of defaultFree)
-                        .let {
-                            if (method == Method.SYNTHETIC_BASIS) {
-                                it.minus("basisJson").with(basisField of defaultBasis)
-                            } else {
-                                it
-                            }
-                        },
-                renderedSteps = renderedSteps,
-                syntheticSteps = syntheticSteps,
-                trueSteps = trueSteps,
-            )
+                HomePageVM(
+                    form =
+                        form
+                            .minus("currentTaskJson")
+                            .with(currentTaskField of currentTask)
+                            .with(freeField of defaultFree)
+                            .let {
+                                if (method == Method.SYNTHETIC_BASIS) {
+                                    it.minus("basisJson").with(basisField of defaultBasis)
+                                } else {
+                                    it
+                                }
+                            },
+                    renderedSteps = renderedSteps,
+                    syntheticSteps = syntheticSteps,
+                    trueSteps = trueSteps,
+                )
     }
 }

@@ -14,32 +14,25 @@ class CurrentTask(
     val function: Function,
     val taskType: TaskType,
 ) {
-    @JsonIgnore
     val syntheticSimplexTables = mutableListOf<SimplexTable>()
-
-    @JsonIgnore
     val simplexTables = mutableListOf<SimplexTable>()
-
-    @JsonIgnore
     val syntheticReplaces = mutableMapOf<Int, Pair<Int, Int>>()
-
-    @JsonIgnore
     val simplexReplaces = mutableMapOf<Int, Pair<Int, Int>>()
-
-    @JsonIgnore
     val syntheticBasisTable: SyntheticBasis?
 
     init {
         when (method) {
             Method.SIMPLEX_METHOD -> {
                 syntheticBasisTable = null
-                simplexTables.add(
-                    SimplexTable(
-                        matrix = matrix,
-                        function = function,
-                        taskType = taskType,
-                    ),
-                )
+                if (simplexTables.isEmpty()) {
+                    simplexTables.add(
+                        SimplexTable(
+                            matrix = matrix,
+                            function = function,
+                            taskType = taskType,
+                        ),
+                    )
+                }
             }
 
             Method.SYNTHETIC_BASIS -> {
@@ -49,24 +42,22 @@ class CurrentTask(
                         function = function,
                         taskType = taskType,
                     )
-                syntheticSimplexTables.add(syntheticBasisTable.startTable)
+                if (syntheticSimplexTables.isEmpty()) {
+                    syntheticSimplexTables.add(syntheticBasisTable.startTable)
+                }
             }
         }
     }
 
     fun solve(stepByStep: Boolean = false) {
         if (stepByStep) {
-            doStep()
+            nextStep()
         }
         if (method == Method.SYNTHETIC_BASIS) {
             while (true) {
-                println("До")
-                println(syntheticSimplexTables.last())
                 val possibleValues = syntheticSimplexTables.last().possibleReplaces()?.first() ?: break
                 syntheticReplaces[syntheticReplaces.size] = possibleValues
                 syntheticSimplexTables.add(syntheticSimplexTables.last() changeBasisBy possibleValues)
-                println("После")
-                println(syntheticSimplexTables.last())
             }
 //            simplexTables.add(syntheticBasisTable!! extractSolutionFrom syntheticSimplexTables.last())
         }
@@ -77,19 +68,30 @@ class CurrentTask(
 //        }
     }
 
-    fun doStep() {
-        var doSimplexStep: Boolean = true
+    fun nextStep() {
+        var doSimplexStep = true
         if (method == Method.SYNTHETIC_BASIS) {
+            println(syntheticSimplexTables.last())
+            println(syntheticSimplexTables.size)
             syntheticSimplexTables.last().possibleReplaces()?.first()?.let { possibleValues ->
                 syntheticReplaces[syntheticReplaces.size] = possibleValues
+                println(possibleValues)
                 syntheticSimplexTables.add(syntheticSimplexTables.last() changeBasisBy possibleValues)
                 doSimplexStep = false
             } ?: simplexTables.add(syntheticBasisTable!! extractSolutionFrom syntheticSimplexTables.last())
         }
-        while (true) {
-            val possibleValues = simplexTables.last().possibleReplaces()?.first() ?: break
+        if (doSimplexStep) {
+            val possibleValues = simplexTables.last().possibleReplaces()?.first() ?: return
             simplexReplaces[simplexReplaces.size] = possibleValues
             simplexTables.add(simplexTables.last() changeBasisBy possibleValues)
+        }
+    }
+
+    fun previousStep() {
+        if (simplexTables.isNotEmpty()) {
+            simplexTables.removeLast()
+        } else if (syntheticSimplexTables.isNotEmpty()) {
+            syntheticSimplexTables.removeLast()
         }
     }
 
