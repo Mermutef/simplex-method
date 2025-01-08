@@ -1,5 +1,6 @@
 package ru.yarsu.db
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import ru.yarsu.domain.entities.Function
 import ru.yarsu.domain.entities.Matrix
 import ru.yarsu.domain.entities.TaskType
@@ -13,14 +14,25 @@ class CurrentTask(
     val function: Function,
     val taskType: TaskType,
 ) {
+    @JsonIgnore
+    val syntheticSimplexTables = mutableListOf<SimplexTable>()
+
+    @JsonIgnore
     val simplexTables = mutableListOf<SimplexTable>()
-    val replaces = mutableMapOf<Int, Pair<Int, Int>>()
-    val syntheticBasis: SyntheticBasis?
+
+    @JsonIgnore
+    val syntheticReplaces = mutableMapOf<Int, Pair<Int, Int>>()
+
+    @JsonIgnore
+    val simplexReplaces = mutableMapOf<Int, Pair<Int, Int>>()
+
+    @JsonIgnore
+    val syntheticBasisTable: SyntheticBasis?
 
     init {
         when (method) {
             Method.SIMPLEX_METHOD -> {
-                syntheticBasis = null
+                syntheticBasisTable = null
                 simplexTables.add(
                     SimplexTable(
                         matrix = matrix,
@@ -31,20 +43,52 @@ class CurrentTask(
             }
 
             Method.SYNTHETIC_BASIS -> {
-                syntheticBasis =
+                syntheticBasisTable =
                     SyntheticBasis(
                         matrix = matrix,
                         function = function,
+                        taskType = taskType,
                     )
-                simplexTables.add(syntheticBasis.startTable)
+                syntheticSimplexTables.add(syntheticBasisTable.startTable)
             }
         }
     }
 
-    fun solve() {
+    fun solve(stepByStep: Boolean = false) {
+        if (stepByStep) {
+            doStep()
+        }
+        if (method == Method.SYNTHETIC_BASIS) {
+            while (true) {
+                println("До")
+                println(syntheticSimplexTables.last())
+                val possibleValues = syntheticSimplexTables.last().possibleReplaces()?.first() ?: break
+                syntheticReplaces[syntheticReplaces.size] = possibleValues
+                syntheticSimplexTables.add(syntheticSimplexTables.last() changeBasisBy possibleValues)
+                println("После")
+                println(syntheticSimplexTables.last())
+            }
+//            simplexTables.add(syntheticBasisTable!! extractSolutionFrom syntheticSimplexTables.last())
+        }
+//        while (true) {
+//            val possibleValues = simplexTables.last().possibleReplaces()?.first() ?: break
+//            simplexReplaces[simplexReplaces.size] = possibleValues
+//            simplexTables.add(simplexTables.last() changeBasisBy possibleValues)
+//        }
+    }
+
+    fun doStep() {
+        var doSimplexStep: Boolean = true
+        if (method == Method.SYNTHETIC_BASIS) {
+            syntheticSimplexTables.last().possibleReplaces()?.first()?.let { possibleValues ->
+                syntheticReplaces[syntheticReplaces.size] = possibleValues
+                syntheticSimplexTables.add(syntheticSimplexTables.last() changeBasisBy possibleValues)
+                doSimplexStep = false
+            } ?: simplexTables.add(syntheticBasisTable!! extractSolutionFrom syntheticSimplexTables.last())
+        }
         while (true) {
             val possibleValues = simplexTables.last().possibleReplaces()?.first() ?: break
-            replaces[simplexTables.size] = possibleValues
+            simplexReplaces[simplexReplaces.size] = possibleValues
             simplexTables.add(simplexTables.last() changeBasisBy possibleValues)
         }
     }
@@ -52,6 +96,15 @@ class CurrentTask(
     fun extractSolution(): Pair<String, String> {
         val lastStep = simplexTables.last()
         return Pair(lastStep.functionValue.toString(), lastStep.vertex.toString())
+    }
+
+    override fun toString(): String {
+        return """
+            $taskType
+            $method
+            $function
+            $matrix
+            """.trimIndent()
     }
 }
 

@@ -1,13 +1,22 @@
-{# @pebvariable name="model" type="ru.yarsu.web.models.HomePageVM" #}
+{# @pebvariable name="model" type="ru.yarsu.web.models.common.HomePageVM" #}
 
-    {% extends "./partials/Layout.peb" %}
-    {% block fromFile %}
+    {% extends "../layout/Layout.peb" %}
+    {% block fileActions %}
     <ul class="navbar-nav ms-auto">
         <li class="nav-item">
             <a class="nav-link underline"
                onclick="document.getElementById('file').click();"
                href="#"
                target="_self">Загрузить из файла
+            </a>
+        </li>
+    </ul>
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link underline"
+               href="#"
+               onclick="saveToFile();"
+               target="_self">Сохранить в файл
             </a>
         </li>
     </ul>
@@ -26,10 +35,10 @@
                             <table id="function" class="table table-bordered table-sm text-center align-middle">
                                 <thead>
                                 <tr id="function-header">
-                                    <th scope="col">x1</th>
-                                    <th scope="col">x2</th>
-                                    <th scope="col">x3</th>
-                                    <th scope="col">x4</th>
+                                    <th scope="col">x<sub>1</sub></th>
+                                    <th scope="col">x<sub>2</sub></th>
+                                    <th scope="col">x<sub>3</sub></th>
+                                    <th scope="col">x<sub>4</sub></th>
                                     <th scope="col">b</th>
                                 </tr>
                                 </thead>
@@ -47,10 +56,10 @@
                             <table id="matrix" class="table table-bordered table-sm text-center align-middle">
                                 <thead>
                                 <tr id="matrix-header"> <!--свободные переменные-->
-                                    <th scope="col">x1</th>
-                                    <th scope="col">x2</th>
-                                    <th scope="col">x3</th>
-                                    <th scope="col">x4</th>
+                                    <th scope="col">x<sub>1</sub></th>
+                                    <th scope="col">x<sub>2</sub></th>
+                                    <th scope="col">x<sub>3</sub></th>
+                                    <th scope="col">x<sub>4</sub></th>
                                     <th scope="col">b</th>
                                 </tr>
                                 </thead>
@@ -98,30 +107,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-75">
-                        <h4 class="mt-3">Индексы базисных переменных</h4>
-                        <table id="basis" class="table table-bordered table-sm text-center align-middle">
-                            <tbody>
-                            <tr id="basis-coefficients">
-                                <td><input name="basis" class="form-control" type="number" value="0"></td>
-                                <td><input name="basis" class="form-control" type="number" value="0"></td>
-                            </tr>
-                            </tbody>
-                        </table>
+                    <div id="solution">
+                            {% if model.renderedSteps is not empty %}
+                            <h1>Решение</h1>
+                            {{ model.renderedSteps | raw }}
+                            {% endif %}
                     </div>
-                    <div class="w-75" id="freeTable" hidden>
-                        <h4 class="mt-3">Индексы свободных переменных</h4>
-                        <table id="free" class="table table-bordered table-sm text-center align-middle">
-                            <tbody>
-                            <tr id="free-coefficients">
-                                <td><input name="free" class="form-control" type="number" value="0"></td>
-                                <td><input name="free" class="form-control" type="number" value="0"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <h1>Решение</h1>
-                    {{ model.renderedSteps | raw }}
                 </div>
                 <div class="col-3">
                     <div class="col mb-3">
@@ -145,7 +136,7 @@
                         <label for="method">
                             Метод:
                         </label>
-                        <select name="method" id="method" class="form-control">
+                        <select name="method" id="method" class="form-control" onchange="updateVariablesState();">
                             <option value="simplex-method"
                                 {% if model.form.fields["method"].first() == "simplex-method" %}
                                     selected
@@ -160,25 +151,91 @@
                             </option>
                         </select>
                     </div>
-                    <div class="form-check form-switch">
+                    <div id="variablesContainer">
+                        <label>Индексы базисных переменных</label>
+                        <div id="basis-indices">
+                            <div class="form-check form-check-inline p-0 m-1">
+                                <input type="checkbox"
+                                       class="btn-check"
+                                       name="basis"
+                                       id="variable-idx-0"
+                                       autocomplete="off"
+                                       value="0"
+                                       checked
+                                >
+                                <label class="btn btn-outline-primary underline"
+                                       for="variable-idx-0"
+                                >x<sub>1</sub>
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline p-0 m-1">
+                                <input type="checkbox"
+                                       class="btn-check"
+                                       name="basis"
+                                       id="variable-idx-1"
+                                       autocomplete="off"
+                                       value="1"
+                                       checked
+                                >
+                                <label class="btn btn-outline-primary underline"
+                                       for="variable-idx-1"
+                                >x<sub>2</sub>
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline p-0 m-1">
+                                <input type="checkbox"
+                                       class="btn-check"
+                                       name="basis"
+                                       id="variable-idx-2"
+                                       autocomplete="off"
+                                       value="2"
+                                       disabled
+                                >
+                                <label class="btn btn-outline-primary underline"
+                                       for="variable-idx-2"
+                                >x<sub>3</sub>
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline p-0 m-1">
+                                <input type="checkbox"
+                                       class="btn-check"
+                                       name="basis"
+                                       id="variable-idx-3"
+                                       autocomplete="off"
+                                       value="3"
+                                       disabled
+                                >
+                                <label class="btn btn-outline-primary underline"
+                                       for="variable-idx-3"
+                                >x<sub>4</sub>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mt-2">
                         <input class="form-check-input"
                                type="checkbox"
-                               name="inputFree"
-                               id="inputFree"
-                               onchange="processFree();"
-                            {% if model.form.fields["inputFree"].first() == "on" %}
-                                {{ "checked" }}
+                               name="stepByStep"
+                               id="stepByStep"
+                            {% if model.form.fields["stepByStep"].first() == "on" %}
+                            {{ "checked" }}
                             {% endif %}
                         >
                         <label class="form-check-label"
-                               for="inputFree"
-                        >Ввести индексы свободных переменных
+                               for="stepByStep"
+                        >Пошаговое решение
                         </label>
                     </div>
-                    <textarea name="matrixJson" id="matrixJson" hidden="hidden">{{ model.form.fields["matrixJson"].first() }}</textarea>
-                    <textarea name="functionJson" id="functionJson" hidden="hidden">{{ model.form.fields["functionJson"].first() }}</textarea>
-                    <textarea name="basisJson" id="basisJson" hidden="hidden">{{ model.form.fields["basisJson"].first() }}</textarea>
-                    <textarea name="freeJson" id="freeJson" hidden="hidden">{{ model.form.fields["freeJson"].first() }}</textarea>
+                    <textarea name="matrixJson" id="matrixJson"
+                              hidden="hidden">{{ model.form.fields["matrixJson"].first() }}</textarea>
+                    <textarea name="functionJson" id="functionJson"
+                              hidden="hidden">{{ model.form.fields["functionJson"].first() }}</textarea>
+                    <textarea name="basisJson" id="basisJson"
+                              hidden="hidden">{{ model.form.fields["basisJson"].first() }}</textarea>
+                    <textarea name="freeJson" id="freeJson"
+                              hidden="hidden">{{ model.form.fields["freeJson"].first() }}</textarea>
+                    <textarea name="currentTaskJson" id="currentTaskJson"
+                              hidden="hidden">{{ model.form.fields["currentTaskJson"].first() }}</textarea>
                     <button class="btn btn-outline-primary underline mt-2"
                             onclick="prepareData();"
                             type="button">Вычислить
@@ -200,8 +257,8 @@
     </div>
     <button id="send-file" type="submit"></button>
 </form>
-    <script>
-        var stepsToRender = {{ model.jsObject }};
-        console.log(stepsToRender);
-    </script>
+<script>
+    var syntheticSteps = {{ model.syntheticStepsJs }};
+    var trueSteps = {{ model.trueStepsJs }};
+</script>
 {% endblock %}

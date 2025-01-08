@@ -1,12 +1,12 @@
-package ru.yarsu.web.handlers
+package ru.yarsu.web.handlers.common
 
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
-import kotlin.system.exitProcess
+import org.http4k.core.Status
 
-class KillHandler : HttpHandler {
+class PingHandler : HttpHandler {
     override fun invoke(request: Request): Response {
-        exitProcess(0)
+        return Response(Status.OK).body("pong")
     }
 }

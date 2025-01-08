@@ -14,8 +14,9 @@ import ru.yarsu.web.handlers.HandlersContainer
 fun router(handlers: HandlersContainer): RoutingHttpHandler =
     routes(
         "/" bind Method.GET to handlers.home,
-        "/" bind Method.POST to handlers.runCalculating,
+        "/" bind Method.POST to handlers.solveCalculating,
         "/load-from-file" bind Method.POST to handlers.loadFromFile,
+        "/save-to-file" bind Method.POST to handlers.saveToFile,
         "/ping" bind Method.GET to handlers.ping,
         "kill" bind Method.GET to handlers.kill,
     )

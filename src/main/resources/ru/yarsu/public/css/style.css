@@ -14,8 +14,16 @@
 .underline:after {
 	display: block;
 	content: "";
-	height: 2px;
+	height: 1px;
 	width: 0%;
 	background-color: #fff;
 	transition: width 0.4s ease-in-out;
+}
+
+.input-primary {
+	background-color: #cfe2ff;
+}
+
+.input-danger {
+	background-color: #f8d7da;
 }

@@ -9,6 +9,7 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
     <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <script src="/js/file-saver.min.js"></script>
 </head>
 <body>
 
@@ -21,7 +22,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            {% block fromFile %}
+            {% block fileActions %}
             {% endblock %}
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">

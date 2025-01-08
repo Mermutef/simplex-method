@@ -5,10 +5,12 @@ import ru.yarsu.domain.entities.Fraction
 import ru.yarsu.domain.entities.Function
 import ru.yarsu.domain.entities.Matrix
 import ru.yarsu.domain.entities.Matrix.Companion.unaryMinus
+import ru.yarsu.domain.entities.TaskType
 
 class SyntheticBasis(
     val matrix: Matrix,
     val function: Function,
+    val taskType: TaskType,
 ) {
     /**
      * Список индексов искусственных базисных переменных
@@ -70,16 +72,21 @@ class SyntheticBasis(
      * @return начальную симплекс-таблицу исходной задачи
      */
     infix fun extractSolutionFrom(lastTable: SimplexTable): SimplexTable {
-        if (lastTable
-                .function
-                .coefficients
-                .filterIndexed { idx, _ -> idx in (lastTable.matrix.free - basis.toSet()) }
-                .any { it != Fraction.from(0) } ||
-            lastTable.function.coefficients[lastTable.matrix.bIdx] != Fraction.from(0)
-        ) {
-            error("Невозможно построить начальную симплекс таблицу.")
+        val functionInBasis = function.inBasisOf(lastTable.matrix, taskType)
+        require(functionInBasis.coefficients.filterIndexed { idx, _ -> idx in free }.all { it == Fraction.from(0) }) {
+            "Конечная симплекс-таблица искусственного базиса не имеет оптимального решения"
+        }
+        require(functionInBasis.coefficients.last() == Fraction.from(0)) {
+            "Конечная симплекс-таблица искусственного базиса не имеет оптимального решения"
+        }
+        require(lastTable.matrix.basis.filter { lastTable.vertex[it] != Fraction.from(0) }.all { it in free }) {
+            "Невозможно вывести искусственную переменную из базиса и она не равна нулю"
         }
 
+//        val needlessMatrixRows
+
+        println(lastTable.matrix.basis)
+        println(lastTable.matrix.free.filter { it !in basis })
         return SimplexTable(
             matrix =
                 Matrix(
@@ -95,6 +102,7 @@ class SyntheticBasis(
                     m = matrix.m,
                 ),
             function = function,
+            taskType = taskType,
         )
     }
 }

@@ -1,4 +1,4 @@
-package ru.yarsu.web.handlers
+package ru.yarsu.web.handlers.calculating
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -16,14 +16,13 @@ import ru.yarsu.web.lenses.SimplexFormLenses.fileField
 import ru.yarsu.web.lenses.SimplexFormLenses.fileForm
 import ru.yarsu.web.lenses.SimplexFormLenses.freeField
 import ru.yarsu.web.lenses.SimplexFormLenses.functionField
-import ru.yarsu.web.lenses.SimplexFormLenses.inputFreeField
 import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
 import ru.yarsu.web.lenses.SimplexFormLenses.methodField
 import ru.yarsu.web.lenses.SimplexFormLenses.taskTypeField
-import ru.yarsu.web.models.HomePageVM
+import ru.yarsu.web.models.common.HomePageVM
 import ru.yarsu.web.notFound
 
-class LoadFromFile(
+class LoadFromFileHandler(
     private val render: ContextAwareViewRender,
     private val mapper: ObjectMapper,
 ) : HttpHandler {
@@ -38,7 +37,6 @@ class LoadFromFile(
                 functionField of initialTable.function.coefficients,
                 basisField of initialTable.matrix.basis,
                 freeField of initialTable.matrix.free,
-                inputFreeField of "on",
                 methodField of Method.SIMPLEX_METHOD,
                 taskTypeField of initialTable.taskType,
             )

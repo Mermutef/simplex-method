@@ -6,6 +6,12 @@ import kotlin.math.min
 
 @Suppress("detekt:TooManyFunctions")
 class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> {
+    init {
+        require(denominator != 0) {
+            "Знаменатель не может быть 0"
+        }
+    }
+
     @Suppress("detekt:TooManyFunctions")
     // математические операции для работы с дробью как с обычным числом
     companion object {
@@ -77,16 +83,19 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
         val a = BigInteger.valueOf(abs(this.numerator * 1L))
         val b = BigInteger.valueOf(abs(this.denominator * 1L))
         val divider = a.gcd(b).toInt()
-        val shortenFraction =
-            Fraction(
-                numerator = this.numerator / divider,
-                denominator = this.denominator / divider,
-            )
-        return when {
-            shortenFraction.numerator < 0 && shortenFraction.denominator < 0 ->
-                Fraction(-shortenFraction.numerator, -shortenFraction.denominator)
 
-            shortenFraction.numerator > 0 && shortenFraction.denominator < 0 ->
+        val shortenFraction =
+            if (divider != 0) {
+                Fraction(
+                    numerator = this.numerator / divider,
+                    denominator = this.denominator / divider,
+                )
+            } else {
+                this
+            }
+
+        return when {
+            shortenFraction.numerator != 0 && shortenFraction.denominator < 0 ->
                 Fraction(-shortenFraction.numerator, -shortenFraction.denominator)
 
             else -> shortenFraction
@@ -156,8 +165,6 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
 
             is Int -> this.shorten().compareTo(other) == 0
 
-            is Long -> this.shorten().compareTo(other) == 0
-
             else -> false
         }
 
@@ -167,28 +174,14 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
         return (shortenA - shortenB).sign()
     }
 
-    operator fun compareTo(other: Int): Int =
-        this.shorten()
-            .takeIf { it.denominator == 1 }
-            ?.numerator
-            ?.compareTo(other * 1L)
-            ?: this.toDouble().compareTo(other * 1.0)
-
-    operator fun compareTo(other: Long): Int =
-        this.shorten()
-            .takeIf { it.denominator == 1 }
-            ?.numerator
-            ?.compareTo(other)
-            ?: this.toDouble().compareTo(other * 1.0)
+    operator fun compareTo(other: Int): Int = this.compareTo(from(other))
 
     // получение знака дроби
     private fun sign(): Int =
         when {
             this.numerator * this.denominator > 0 ||
                 this.numerator * this.denominator < 0 ->
-                (
-                    min(this.numerator, this.denominator) / abs(min(this.numerator, this.denominator))
-                ).toInt()
+                min(this.numerator, this.denominator) / abs(min(this.numerator, this.denominator))
 
             else -> 0
         }

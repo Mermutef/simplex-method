@@ -15,7 +15,9 @@ import org.http4k.lens.WebForm
 import org.http4k.lens.multipartForm
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.nonEmptyString
+import org.http4k.lens.string
 import org.http4k.lens.webForm
+import ru.yarsu.db.CurrentTask
 import ru.yarsu.domain.entities.Fraction.Companion.toFraction
 import ru.yarsu.domain.entities.TaskType
 import ru.yarsu.domain.simplex.Method
@@ -83,19 +85,6 @@ object SimplexFormLenses {
                 },
             ).required("functionJson")
 
-    val freeField =
-        FormField
-            .nonBlankString()
-            .nonEmptyString()
-            .map(
-                { fromForm ->
-                    runCatching {
-                        jmapper.readValue<List<Int>>(fromForm)
-                    }.getOrElse { throw IllegalArgumentException("") }
-                },
-                { toForm -> jmapper.writeValueAsString(toForm) },
-            ).required("freeJson")
-
     val basisField =
         FormField
             .nonBlankString()
@@ -109,7 +98,35 @@ object SimplexFormLenses {
                 { toForm -> jmapper.writeValueAsString(toForm) },
             ).required("basisJson")
 
-    val inputFreeField = FormField.optional("inputFree")
+    val freeField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm ->
+                    runCatching {
+                        jmapper.readValue<List<Int>>(fromForm)
+                    }.getOrElse { throw IllegalArgumentException("") }
+                },
+                { toForm -> jmapper.writeValueAsString(toForm) },
+            ).optional("freeJson")
+
+    val currentTaskField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm: String ->
+                    runCatching { jmapper.readValue<CurrentTask>(fromForm) }.getOrNull()
+                        ?: throw IllegalArgumentException()
+                },
+                { toForm: CurrentTask? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
+            ).optional("currentTaskJson")
+
+    val modeField =
+        FormField
+            .string()
+            .optional("stepByStep")
 
     val taskForm =
         Body.webForm(
@@ -118,9 +135,9 @@ object SimplexFormLenses {
             taskTypeField,
             matrixField,
             functionField,
-            freeField,
             basisField,
-            inputFreeField,
+            modeField,
+            currentTaskField,
         ).toLens()
 
     val fileField = MultipartFormFile.required("file")
@@ -140,3 +157,7 @@ object SimplexFormLenses {
         null
     }
 }
+
+fun String.isBlankOrEmpty() = this.isBlank() || this.isEmpty()
+
+fun String.isNotBlankOrEmpty() = this.isNotBlank() && this.isNotEmpty()

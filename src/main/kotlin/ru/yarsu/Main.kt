@@ -33,10 +33,12 @@ fun main() {
     val appWithStaticResources =
         ServerFilters.InitialiseRequestContext(contextTools.appContexts)
             .then(NotFoundFilter(contextTools.render))
-            .then(ServerFilters.CatchAll {
-                it.printStackTrace()
-                notFound()
-            })
+            .then(
+                ServerFilters.CatchAll {
+                    it.printStackTrace()
+                    notFound()
+                },
+            )
             .then(
                 routes(
                     router(HandlersContainer(contextTools, mapper)),

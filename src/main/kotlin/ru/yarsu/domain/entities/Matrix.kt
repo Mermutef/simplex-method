@@ -160,7 +160,7 @@ data class Matrix(
         coefficients.sortBy { it.countLeadZeros() }
         for (i in 0..<m) {
             coefficients.sortBy { it.countLeadZeros() }
-            if (!coefficients[i][i].equals(0)) {
+            if (coefficients[i][i] != Fraction.from(0)) {
                 coefficients[i] = (coefficients[i] / coefficients[i][i])
                 for (j in i + 1..<m) {
                     coefficients[j] = (coefficients[j] - (coefficients[i] * coefficients[j][i]))
@@ -184,7 +184,7 @@ data class Matrix(
     fun reverseRunning(): Matrix {
         val coefficients = this.coefficients.copyOf()
         for (i in m - 1 downTo 0) {
-            if (!coefficients[i][i].equals(0)) {
+            if (coefficients[i][i] != Fraction.from(0)) {
                 coefficients[i] = (coefficients[i] / coefficients[i][i])
                 for (j in i - 1 downTo 0) {
                     coefficients[j] = (coefficients[j] - (coefficients[i] * coefficients[j][i]))
@@ -198,6 +198,19 @@ data class Matrix(
             basis = basis,
             free = free,
         )
+    }
+
+    fun solveGauss(
+        withBasis: List<Int>? = null,
+        withFree: List<Int>? = null,
+    ): Matrix {
+        val newBasis = withBasis ?: (0..<m).toList()
+        val newFree = withFree ?: (0..<n - 1).toList().filter { it !in newBasis }
+        return this.inBasis(
+            newBasis = newBasis,
+            newFree = newFree,
+        ).straightRunning()
+            .reverseRunning()
     }
 
     override fun toString(): String {

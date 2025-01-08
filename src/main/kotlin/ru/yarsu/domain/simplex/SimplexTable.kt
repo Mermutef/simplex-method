@@ -73,19 +73,17 @@ class SimplexTable(
         if (forIdleRunning) return idleRunningReplaces()
 
         val functionInBasis = function.inBasisOf(matrix, taskType)
-
-        val possibleS =
-            matrix.free.filter { idx ->
-                functionInBasis.coefficients[idx] < 0
-            }
-        val fractions = mutableListOf<Triple<Fraction, Int, Int>>()
-
-        for (s in possibleS) {
+        val possibleReplaces = mutableListOf<Pair<Int, Int>>()
+        matrix.free.filter { idx ->
+            functionInBasis.coefficients[idx] < 0
+        }.forEach { s ->
+            println(functionInBasis.coefficients[s])
             val sIdx = matrix.fullIndices.indexOf(s)
-            for (r in matrix.basis) {
+            val candidates = mutableListOf<Triple<Fraction, Int, Int>>()
+            matrix.basis.forEach { r ->
                 val rIdx = matrix.fullIndices.indexOf(r)
-                if (matrix.coefficients[rIdx][sIdx] > 0) {
-                    fractions.add(
+                if (matrix.coefficients[rIdx][sIdx] > 0 && matrix.coefficients[rIdx][matrix.bIdx] >= 0) {
+                    candidates.add(
                         Triple(
                             matrix.coefficients[rIdx][matrix.bIdx] / matrix.coefficients[rIdx][sIdx],
                             s,
@@ -94,13 +92,10 @@ class SimplexTable(
                     )
                 }
             }
+            candidates.minByOrNull { it.first }?.let { possibleReplaces.add(Pair(it.second, it.third)) }
         }
 
-        return fractions
-            .minByOrNull { it.first }
-            ?.let { minValue -> fractions.filter { it.first == minValue.first } }
-            ?.map { Pair(it.second, it.third) }
-            ?.takeIf { it.isNotEmpty() }
+        return possibleReplaces.takeIf { it.isNotEmpty() }
     }
 
     /**

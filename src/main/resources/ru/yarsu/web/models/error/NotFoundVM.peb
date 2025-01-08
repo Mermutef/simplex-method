@@ -1,6 +1,6 @@
-{# @pebvariable name="model" type="ru.yarsu.web.models.NotFoundVM" #}
+{# @pebvariable name="model" type="ru.yarsu.web.models.error.NotFoundVM" #}
 
-    {% extends "./partials/Layout.peb" %}
+    {% extends "../layout/Layout.peb" %}
     {% block title %}Страница не найдена{% endblock %}
     {% block menuColor %}danger{% endblock %}
     {% block pageHeading %}{% endblock %}
