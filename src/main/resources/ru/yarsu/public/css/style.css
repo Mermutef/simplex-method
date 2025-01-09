@@ -1,29 +1,29 @@
 .full-size {
-	width: 100vh;
+    width: 100vh;
 }
 
 .underline:hover:after,
 .underline:focus:after {
-	width: 100%;
+    width: 100%;
 }
 
 .underline:hover {
-	color: #fff;
+    color: #fff;
 }
 
 .underline:after {
-	display: block;
-	content: "";
-	height: 1px;
-	width: 0%;
-	background-color: #fff;
-	transition: width 0.4s ease-in-out;
+    display: block;
+    content: "";
+    height: 1px;
+    width: 0;
+    background-color: #fff;
+    transition: width 0.4s ease-in-out;
 }
 
 .input-primary {
-	background-color: #cfe2ff;
+    background-color: #cfe2ff;
 }
 
 .input-danger {
-	background-color: #f8d7da;
+    background-color: #f8d7da;
 }
