@@ -23,7 +23,6 @@ data class Matrix(
     val fullIndices: List<Int>
         get() = basis + free + listOf(bIdx)
 
-    // второй конструктор, чтобы каждый раз не мучиться с переводом MutableList к Array
     constructor(
         n: Int,
         m: Int,
@@ -38,22 +37,21 @@ data class Matrix(
         free = free,
     )
 
-    // проверки при создании экземпляра класса
     init {
         require(coefficients.all { it.size == n }) {
-            "Все строки матрицы должны содержать ровно n=$n коэффициентов"
+            "Все строки матрицы должны содержать ровно n=$n коэффициентов."
         }
 
         require(coefficients.size == m) {
-            "Матрица должна содержать ровно m=$m строк"
+            "Матрица должна содержать ровно m=$m строк."
         }
 
         require(basis.size == m) {
-            "Число базисных переменных должно быть равно m=$m"
+            "Число базисных переменных должно совпадать с числом строк (передано ${basis.size}, ожидалось $m)."
         }
 
         require(free.size == n - m - 1) {
-            "Число свободных переменных должно быть равно n-m=${n - m - 1} (${free.size})"
+            "Число свободных переменных должно быть равно n-1-m (передано ${free.size}, ожидалось ${n - m - 1})."
         }
 
         require(basis.all { it < n }) {
@@ -64,9 +62,17 @@ data class Matrix(
         }
     }
 
-    // переопределенные математические операторы для удобной работы со строками
-    // (умножение и деление на дробь, сложение и вычитание двух векторов, ...)
     companion object {
+        operator fun List<Fraction>.times(coff: Fraction): List<Fraction> = this.map { it * coff }
+
+        operator fun List<Fraction>.div(coff: Fraction): List<Fraction> = this.map { it / coff }
+
+        operator fun List<Fraction>.plus(other: Array<Fraction>): List<Fraction> = this.zip(other).map { (a, b) -> a + b }
+
+        operator fun List<Fraction>.minus(other: Array<Fraction>): List<Fraction> = this.zip(other).map { (a, b) -> a - b }
+
+        operator fun List<Fraction>.unaryMinus(): List<Fraction> = this * Fraction.from(-1)
+
         operator fun Array<Fraction>.times(coff: Fraction): Array<Fraction> =
             this
                 .map { it * coff }
@@ -89,33 +95,7 @@ data class Matrix(
                 .map { (a, b) -> a - b }
                 .toTypedArray()
 
-        operator fun Array<Fraction>.unaryMinus() = this * Fraction.from(-1)
-
-        /**
-         * Смена двух значений списка местами.
-         *
-         * @return Новый список с поменянными местами i-ым и j-ым элементами
-         */
-        fun <T> List<T>.swap(
-            i: Int,
-            j: Int,
-        ): List<T> {
-            val iItem = this[i]
-            val jItem = this[j]
-            val newList = mutableListOf<T>()
-            newList.addAll(this)
-            newList[i] = jItem
-            newList[j] = iItem
-            return newList
-        }
-
-        private fun Array<Fraction>.countLeadZeros(): Long {
-            var leadZeros = 0L
-            for (cell in this) {
-                if (cell.equals(0L)) leadZeros++ else break
-            }
-            return leadZeros
-        }
+        operator fun Array<Fraction>.unaryMinus(): Array<Fraction> = this * Fraction.from(-1)
     }
 
     /**
@@ -128,10 +108,11 @@ data class Matrix(
      */
     fun inBasis(
         newBasis: List<Int>,
-        newFree: List<Int>,
+        newFree: List<Int>? = null,
     ): Matrix {
+        val defaultFree = (0..<n - 1).filter { it !in newBasis }
         val newCoefficients = mutableListOf<MutableList<Fraction>>()
-        val coefficientsIndices = newBasis + newFree + listOf(bIdx)
+        val coefficientsIndices = newBasis + (newFree ?: defaultFree) + listOf(bIdx)
         coefficients.forEachIndexed { rowIdx, _ ->
             val rowInAnotherBasis = mutableListOf<Fraction>()
             coefficientsIndices.forEach {
@@ -146,71 +127,8 @@ data class Matrix(
             m = m,
             coefficients = newCoefficients,
             basis = newBasis,
-            free = newFree,
+            free = newFree ?: defaultFree,
         )
-    }
-
-    /**
-     * Прямой ход метода Гаусса
-     *
-     * @return новую матрицу, приведенную к верхне диагональному виду относительно базисных переменных
-     */
-    fun straightRunning(): Matrix {
-        val coefficients = this.coefficients.copyOf()
-        coefficients.sortBy { it.countLeadZeros() }
-        for (i in 0..<m) {
-            coefficients.sortBy { it.countLeadZeros() }
-            if (coefficients[i][i] != Fraction.from(0)) {
-                coefficients[i] = (coefficients[i] / coefficients[i][i])
-                for (j in i + 1..<m) {
-                    coefficients[j] = (coefficients[j] - (coefficients[i] * coefficients[j][i]))
-                }
-            }
-        }
-        return Matrix(
-            n = n,
-            m = m,
-            coefficients = coefficients,
-            basis = basis,
-            free = free,
-        )
-    }
-
-    /**
-     * Обратный ход метода Гаусса
-     *
-     * @return новую матрицу, приведенную к нижне диагональному виду относительно базисных переменных
-     */
-    fun reverseRunning(): Matrix {
-        val coefficients = this.coefficients.copyOf()
-        for (i in m - 1 downTo 0) {
-            if (coefficients[i][i] != Fraction.from(0)) {
-                coefficients[i] = (coefficients[i] / coefficients[i][i])
-                for (j in i - 1 downTo 0) {
-                    coefficients[j] = (coefficients[j] - (coefficients[i] * coefficients[j][i]))
-                }
-            }
-        }
-        return Matrix(
-            n = n,
-            m = m,
-            coefficients = coefficients,
-            basis = basis,
-            free = free,
-        )
-    }
-
-    fun solveGauss(
-        withBasis: List<Int>? = null,
-        withFree: List<Int>? = null,
-    ): Matrix {
-        val newBasis = withBasis ?: (0..<m).toList()
-        val newFree = withFree ?: (0..<n - 1).toList().filter { it !in newBasis }
-        return this.inBasis(
-            newBasis = newBasis,
-            newFree = newFree,
-        ).straightRunning()
-            .reverseRunning()
     }
 
     override fun toString(): String {

@@ -1,13 +1,6 @@
 {# @pebvariable name="model" type="ru.yarsu.web.models.part.SimplexStepPT" #}
 <div class="row mt-3">
     <div class="col">
-        {% if model.isLast %}
-            {% if model.isSyntheticBasisStep %}
-                <h4>Финальная симплекс-таблица искусственного базиса</h4>
-                {% else %}
-                <h4>Финальная симплекс-таблица</h4>
-            {% endif %}
-        {% endif %}
         <table id="{% if model.isSyntheticBasisStep %}synthetic-{% endif %}matrix-{{ model.stepIdx }}"
                class="table table-bordered table-sm text-center align-middle"
         >

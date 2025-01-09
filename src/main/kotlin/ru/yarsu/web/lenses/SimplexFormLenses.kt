@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.http4k.core.Body
 import org.http4k.core.Request
 import org.http4k.lens.BiDiBodyLens
+import org.http4k.lens.BiDiLens
 import org.http4k.lens.FormField
 import org.http4k.lens.Lens
 import org.http4k.lens.LensFailure
@@ -15,12 +16,12 @@ import org.http4k.lens.WebForm
 import org.http4k.lens.multipartForm
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.nonEmptyString
-import org.http4k.lens.string
 import org.http4k.lens.webForm
-import ru.yarsu.db.CurrentTask
 import ru.yarsu.domain.entities.Fraction.Companion.toFraction
 import ru.yarsu.domain.entities.TaskType
 import ru.yarsu.domain.simplex.Method
+import ru.yarsu.domain.simplex.SimplexMethod
+import ru.yarsu.domain.simplex.SyntheticBasisMethod
 
 private val jmapper = jacksonObjectMapper()
 
@@ -111,21 +112,33 @@ object SimplexFormLenses {
                 { toForm -> jmapper.writeValueAsString(toForm) },
             ).optional("freeJson")
 
-    val currentTaskField =
+    val simplexMethodField =
         FormField
             .nonBlankString()
             .nonEmptyString()
             .map(
                 { fromForm: String ->
-                    runCatching { jmapper.readValue<CurrentTask>(fromForm) }.getOrNull()
+                    runCatching { jmapper.readValue<SimplexMethod>(fromForm) }.getOrNull()
                         ?: throw IllegalArgumentException()
                 },
-                { toForm: CurrentTask? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
+                { toForm: SimplexMethod? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
+            ).optional("currentTaskJson")
+
+    val syntheticBasisMethodField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm: String ->
+                    runCatching { jmapper.readValue<SyntheticBasisMethod>(fromForm) }.getOrNull()
+                        ?: throw IllegalArgumentException()
+                },
+                { toForm: SyntheticBasisMethod? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
             ).optional("currentTaskJson")
 
     val modeField = FormField.optional("stepByStep")
 
-    val taskForm =
+    val taskMetadataForm =
         Body.webForm(
             Validator.Feedback,
             methodField,
@@ -134,8 +147,19 @@ object SimplexFormLenses {
             functionField,
             basisField,
             modeField,
-            currentTaskField,
         ).toLens()
+
+    val simplexMethodForm =
+        Body.webForm(
+            Validator.Feedback,
+            simplexMethodField,
+        )
+
+    val syntheticBasisMethodForm =
+        Body.webForm(
+            Validator.Feedback,
+            syntheticBasisMethodField,
+        )
 
     val fileField = MultipartFormFile.required("file")
 
@@ -144,6 +168,10 @@ object SimplexFormLenses {
     infix fun BiDiBodyLens<WebForm>.from(request: Request) = this(request)
 
     infix fun BiDiBodyLens<MultipartForm>.from(request: Request) = this(request)
+
+    infix fun <T> BiDiLens<WebForm, T>.from(form: WebForm) = this(form)
+
+    infix fun <T> BiDiLens<MultipartForm, T>.from(form: MultipartForm) = this(form)
 
     fun <IN : Any, OUT> lensOrNull(
         lens: Lens<IN, OUT?>,

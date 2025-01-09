@@ -173,11 +173,14 @@ function deleteColumn() {
 	updateBasisIndices();
 }
 
-async function prepareData() {
+async function prepareData(sendData = true) {
 	prepareBasis();
 	prepareMatrix();
 	prepareFunction();
-	document.getElementById("send-task").click();
+	if (sendData) {
+		document.getElementById("currentTaskJson").value = "";
+		document.getElementById("send-task").click();
+	}
 }
 
 function prepareMatrix() {
@@ -339,5 +342,6 @@ async function saveToFile() {
 }
 
 loadData();
-
 addListeners();
+updateBasisIndices();
+updateVariablesState();

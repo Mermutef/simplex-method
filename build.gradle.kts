@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
     implementation("io.konform:konform-jvm:+")
+    implementation("dev.forkhandles:result4k:+")
     implementation("org.http4k:http4k-client-okhttp:+")
     implementation("org.http4k:http4k-cloudnative:+")
     implementation("org.http4k:http4k-core:+")

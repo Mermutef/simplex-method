@@ -4,10 +4,13 @@ import org.http4k.lens.WebForm
 import org.http4k.template.ViewModel
 
 class HomePageVM(
-    val form: WebForm? = null,
+    val metadataForm: WebForm? = null,
+    val methodForm: WebForm? = null,
     val renderedSteps: String = "",
     val syntheticSteps: List<Triple<Int, Int, Int>> = emptyList(),
     val trueSteps: List<Triple<Int, Int, Int>> = emptyList(),
+    val hasNextStep: Boolean = true,
+    val hasPreviousStep: Boolean = false,
 ) : ViewModel {
     val syntheticStepsJs: String
         get() = renderStepsJs(syntheticSteps)

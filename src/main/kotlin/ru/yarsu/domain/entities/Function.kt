@@ -17,6 +17,7 @@ class Function(
         matrix: Matrix,
         taskType: TaskType,
         doTransform: Boolean = true,
+        invertLast: Boolean = false,
     ): Function {
         val newCoefficients = mutableListOf<Fraction>()
         coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction.from(0)) }
@@ -30,6 +31,7 @@ class Function(
                 }
             }
 
+        if (invertLast) newCoefficients[newCoefficients.lastIndex] = -newCoefficients.last()
         return Function(if (taskType == TaskType.MAX && doTransform) newCoefficients.map { it * -1 } else newCoefficients)
     }
 

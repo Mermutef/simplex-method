@@ -108,12 +108,26 @@
                         </div>
                     </div>
                     <div id="solution">
-                            {% if model.renderedSteps is not empty %}
+                        {% if model.renderedSteps is not empty %}
                             <h1>Решение</h1>
                             {{ model.renderedSteps | raw }}
-                            <button type="button" onclick="document.getElementById('taskForm').setAttribute('action', '/previous'); prepareData();">Назад</button>
-                            <button type="button" onclick="document.getElementById('taskForm').setAttribute('action', '/next'); prepareData();">Вперед</button>
+                            <div id="pagination" class="text-center">
+                            {% if model.hasPreviousStep %}
+                                <button type="button"
+                                        class="btn btn-outline-primary underline mt-2"
+                                        onclick="document.getElementById('taskForm').setAttribute('action', '/previous'); prepareData();">
+                                    Назад
+                                </button>
                             {% endif %}
+                            {% if model.hasNextStep %}
+                                <button type="button"
+                                        class="btn btn-outline-primary underline mt-2"
+                                        onclick="document.getElementById('taskForm').setAttribute('action', '/next'); prepareData();">
+                                    Вперед
+                                </button>
+                            {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-3">
@@ -121,13 +135,13 @@
                         <label for="task-type">Тип задачи:</label>
                         <select name="task-type" id="task-type" class="form-control">
                             <option value="min"
-                                {% if model.form.fields["task-type"].first() == "min" %}
+                                {% if model.getMetadataForm.fields["task-type"].first() == "min" %}
                                     selected
                                 {% endif %}
                             >минимум
                             </option>
                             <option value="max"
-                                {% if model.form.fields["task-type"].first() == "max" %}
+                                {% if model.getMetadataForm.fields["task-type"].first() == "max" %}
                                     selected
                                 {% endif %}
                             >максимум
@@ -140,13 +154,13 @@
                         </label>
                         <select name="method" id="method" class="form-control" onchange="updateVariablesState();">
                             <option value="simplex-method"
-                                {% if model.form.fields["method"].first() == "simplex-method" %}
+                                {% if model.getMetadataForm.fields["method"].first() == "simplex-method" %}
                                     selected
                                 {% endif %}
                             >симплекс-метод
                             </option>
                             <option value="synthetic-basis"
-                                {% if model.form.fields["method"].first() == "synthetic-basis" %}
+                                {% if model.getMetadataForm.fields["method"].first() == "synthetic-basis" %}
                                     selected
                                 {% endif %}
                             >искусственный базис
@@ -219,7 +233,7 @@
                                type="checkbox"
                                name="stepByStep"
                                id="stepByStep"
-                            {% if model.form.fields["stepByStep"].first() == "on" %}
+                            {% if model.getMetadataForm.fields["stepByStep"].first() == "on" %}
                             {{ "checked" }}
                             {% endif %}
                         >
@@ -229,15 +243,15 @@
                         </label>
                     </div>
                     <textarea name="matrixJson" id="matrixJson"
-                              hidden="hidden">{{ model.form.fields["matrixJson"].first() }}</textarea>
+                              hidden="hidden">{{ model.getMetadataForm.fields["matrixJson"].first() }}</textarea>
                     <textarea name="functionJson" id="functionJson"
-                              hidden="hidden">{{ model.form.fields["functionJson"].first() }}</textarea>
+                              hidden="hidden">{{ model.getMetadataForm.fields["functionJson"].first() }}</textarea>
                     <textarea name="basisJson" id="basisJson"
-                              hidden="hidden">{{ model.form.fields["basisJson"].first() }}</textarea>
+                              hidden="hidden">{{ model.getMetadataForm.fields["basisJson"].first() }}</textarea>
                     <textarea name="freeJson" id="freeJson"
-                              hidden="hidden">{{ model.form.fields["freeJson"].first() }}</textarea>
+                              hidden="hidden">{{ model.getMetadataForm.fields["freeJson"].first() }}</textarea>
                     <textarea name="currentTaskJson" id="currentTaskJson"
-                              hidden="hidden">{{ model.form.fields["currentTaskJson"].first() }}</textarea>
+                              hidden="hidden">{{ model.methodForm.fields["currentTaskJson"].first() }}</textarea>
                     <button class="btn btn-outline-primary underline mt-2"
                             onclick="prepareData();"
                             type="button">Вычислить

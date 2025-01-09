@@ -1,42 +1,17 @@
 package ru.yarsu.domain.simplex
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import ru.yarsu.domain.entities.Fraction
 import ru.yarsu.domain.entities.Function
 import ru.yarsu.domain.entities.Matrix
-import ru.yarsu.domain.entities.Matrix.Companion.swap
 import ru.yarsu.domain.entities.TaskType
+import ru.yarsu.domain.simplex.GaussMethod.reverseRunning
+import ru.yarsu.domain.simplex.GaussMethod.straightRunning
 
 class SimplexTable(
     val matrix: Matrix,
     val function: Function,
     val taskType: TaskType = TaskType.MIN,
 ) {
-    /**
-     * Координаты текущей вершины
-     */
-    @get:JsonIgnore
-    val vertex: List<Fraction>
-        get() {
-            val values = mutableListOf<Pair<Int, Fraction>>()
-            for (i in matrix.basis) {
-                val iIdx = matrix.basis.indexOf(i)
-                values.add(Pair(i, matrix.coefficients[iIdx][matrix.bIdx]))
-            }
-            for (i in matrix.free) {
-                values.add(Pair(i, Fraction.from(0)))
-            }
-
-            return values.sortedBy { it.first }.map { it.second }
-        }
-
-    /**
-     * Значение функции в текущей вершине
-     */
-    @get:JsonIgnore
-    val functionValue: Fraction
-        get() = function.inBasisOf(matrix, taskType).coefficients.last()
-
     /**
      * Очередной шаг симплекс-метода
      *
@@ -67,11 +42,9 @@ class SimplexTable(
     /**
      * Список координат возможных опорных элементов для шага
      *
-     * @return непустой список координат возможных опорных элементов, null иначе
+     * @return список координат возможных опорных элементов
      */
-    fun possibleReplaces(forIdleRunning: Boolean = false): List<Pair<Int, Int>>? {
-        if (forIdleRunning) return idleRunningReplaces()
-
+    fun possibleReplaces(): List<Pair<Int, Int>> {
         val functionInBasis = function.inBasisOf(matrix, taskType)
         val possibleReplaces = mutableListOf<Pair<Int, Int>>()
         matrix.free.filter { idx ->
@@ -91,10 +64,16 @@ class SimplexTable(
                     )
                 }
             }
-            candidates.minByOrNull { it.first }?.let { possibleReplaces.add(Pair(it.second, it.third)) }
+
+            candidates.minByOrNull { it.first }?.let { bestCandidate ->
+                possibleReplaces.addAll(
+                    candidates.filter { it.first == bestCandidate.first }
+                        .map { Pair(it.second, it.third) },
+                )
+            }
         }
 
-        return possibleReplaces.takeIf { it.isNotEmpty() }
+        return possibleReplaces
     }
 
     /**
@@ -124,6 +103,19 @@ class SimplexTable(
 
     override fun toString(): String {
         return "${function.inBasisOf(matrix, taskType, false)} -> ${taskType.toString().lowercase()}\n$matrix"
+    }
+
+    private fun <T> List<T>.swap(
+        i: Int,
+        j: Int,
+    ): List<T> {
+        val iItem = this[i]
+        val jItem = this[j]
+        val newList = mutableListOf<T>()
+        newList.addAll(this)
+        newList[i] = jItem
+        newList[j] = iItem
+        return newList
     }
 }
 
