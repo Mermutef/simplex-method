@@ -1,0 +1,15 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.part.SyntheticBasisSolutionPT" #}
+<div class="row mt-3">
+    <div class="col">
+        <h4>Результат метода искусственного-базиса</h4>
+        {% if model.hasSolution %}
+            <p><b>Базис:</b> {{ model.prettyHTMLSimplexBasis | raw }}</p>
+            {% if model.unnecessaryConstraints is not empty %}
+                <p><b>Индексы строк ограничений, которые необходимо исключить:</b> {{ model.unnecessaryConstraints }}</p>
+            {% endif %}
+        {% else %}
+            <p><b>Решения нет.</b></p>
+            <p>{{ model.cause }}</p>
+        {% endif %}
+    </div>
+</div>

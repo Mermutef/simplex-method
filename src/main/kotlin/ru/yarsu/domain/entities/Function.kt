@@ -15,13 +15,15 @@ class Function(
      */
     fun inBasisOf(
         matrix: Matrix,
-        taskType: TaskType,
+        taskType: TaskType = TaskType.MIN,
         doTransform: Boolean = true,
         invertLast: Boolean = false,
     ): Function {
         val newCoefficients = mutableListOf<Fraction>()
         coefficients.forEachIndexed { _, _ -> newCoefficients.addLast(Fraction.from(0)) }
-        matrix.coefficients.mapIndexed { rowIdx, row -> row * coefficients[matrix.basis[rowIdx]] }
+        matrix.coefficients.mapIndexed { rowIdx, row ->
+            row * coefficients[matrix.basis[rowIdx]]
+        }
             .reduce { row1, row2 -> row1 + row2 }
             .forEachIndexed { idx, pi ->
                 when (val xi = (matrix.fullIndices[idx])) {
@@ -30,7 +32,6 @@ class Function(
                     else -> {}
                 }
             }
-
         if (invertLast) newCoefficients[newCoefficients.lastIndex] = -newCoefficients.last()
         return Function(if (taskType == TaskType.MAX && doTransform) newCoefficients.map { it * -1 } else newCoefficients)
     }

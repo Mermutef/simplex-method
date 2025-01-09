@@ -12,13 +12,13 @@ import ru.yarsu.domain.entities.TaskType
 import ru.yarsu.domain.simplex.GaussMethod.solveGauss
 
 class SimplexMethod(
-    val matrix: Matrix,
-    val function: Function,
-    val startBasis: List<Int>,
-    val taskType: TaskType = TaskType.MIN,
-    val stepsReplaces: MutableMap<Int, Pair<Int, Int>> = mutableMapOf(),
-    val stepsTables: MutableList<SimplexTable> = mutableListOf(),
-) {
+    override val matrix: Matrix,
+    override val function: Function,
+    override val startBasis: List<Int>,
+    override val taskType: TaskType = TaskType.MIN,
+    override val stepsReplaces: MutableMap<Int, Pair<Int, Int>> = mutableMapOf(),
+    override val stepsTables: MutableList<SimplexTable> = mutableListOf(),
+) : SimplexBase {
     init {
         require(startBasis.size == matrix.m) {
             "Недостаточно переменных передано в базис. " +
@@ -29,7 +29,7 @@ class SimplexMethod(
     }
 
     @get:JsonIgnore
-    val startTable: SimplexTable
+    override val startTable: SimplexTable
         get() {
             val matrixInBasis = matrix.solveGauss(withBasis = startBasis)
             return SimplexTable(
@@ -39,12 +39,12 @@ class SimplexMethod(
             )
         }
 
-    fun nextStep(inOutVariables: Pair<Int, Int>? = null): Result<Boolean, SimplexMethodError> {
+    override fun nextStep(inOutVariables: Pair<Int, Int>?): Result<Boolean, SimplexError> {
         val possibleReplaces = stepsTables.last().possibleReplaces()
         if (possibleReplaces.isEmpty()) return Success(false)
 
         val replace = inOutVariables ?: possibleReplaces.first()
-        if (replace !in possibleReplaces) return Failure(SimplexMethodError.INVALID_REPLACE)
+        if (replace !in possibleReplaces) return Failure(SimplexError.INVALID_REPLACE)
 
         stepsReplaces[stepsReplaces.size] = replace
         stepsTables.add(stepsTables.last() changeBasisBy replace)
@@ -52,19 +52,19 @@ class SimplexMethod(
         return Success(true)
     }
 
-    fun previousStep(): Result<Boolean, SimplexMethodError> {
+    override fun previousStep(): Result<Boolean, SimplexError> {
         if (stepsReplaces.isEmpty()) return Success(false)
         stepsReplaces.remove(stepsReplaces.size - 1)
         stepsTables.removeLast()
         return Success(true)
     }
 
-    fun solve() {
+    override fun solve() {
         while (nextStep().valueOrNull()?.takeIf { it } != null) continue
     }
 
     @JsonIgnore
-    fun getSolution(): Result<Pair<List<Fraction>, Fraction>, SimplexMethodError> {
+    override fun getSolution(): Result<Pair<List<Fraction>, Fraction>, SimplexError> {
         val lastStepTable = stepsTables.last()
         val matrix = lastStepTable.matrix
         matrix.coefficients.mapIndexed { idx, row ->
@@ -72,13 +72,13 @@ class SimplexMethod(
                 row[idx] == Fraction.from(0)
         }
             .all { it }.takeIf { it }
-            ?: return Failure(SimplexMethodError.INCORRECT_MATRIX)
+            ?: return Failure(SimplexError.INCORRECT_MATRIX)
 
-        if (lastStepTable.possibleReplaces().isNotEmpty()) return Failure(SimplexMethodError.NOT_OPTIMAL_SOLUTION)
+        if (lastStepTable.possibleReplaces().isNotEmpty()) return Failure(SimplexError.NOT_OPTIMAL_SOLUTION)
 
         val functionInBasis = function.inBasisOf(matrix, taskType)
         if (functionInBasis.coefficients.dropLast(1).any { xi -> xi < 0 }) {
-            return Failure(SimplexMethodError.UNLIMITED_FUNCTION)
+            return Failure(SimplexError.UNLIMITED_FUNCTION)
         }
 
         val vertex =
@@ -95,12 +95,9 @@ class SimplexMethod(
 
         return Success(Pair(vertex, functionValue))
     }
-}
 
-@Suppress("ktlint:standard:max-line-length", "detekt:MaxLineLength")
-enum class SimplexMethodError(val text: String) {
-    UNLIMITED_FUNCTION("Функция на заданном множестве неограниченна, минимизировать (максимизировать) невозможно."),
-    INCORRECT_MATRIX("Некорректная симплекс-таблица. Симплекс-таблица должна иметь диагональный вид относительно базисных переменных."),
-    NOT_OPTIMAL_SOLUTION("Симплекс-таблица не является оптимальной (имеются доступные замены)."),
-    INVALID_REPLACE("Данные индексы переменных не являются допустимыми для совершения шага симплекс-метода."),
+    @JsonIgnore
+    override fun getSolution(a: Int): Result<Pair<List<Int>, List<Int>>, SimplexError> {
+        return Failure(SimplexError.IT_IS_NOT_GOOD)
+    }
 }

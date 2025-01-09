@@ -5,18 +5,19 @@ import org.http4k.template.ViewModel
 
 class HomePageVM(
     val metadataForm: WebForm? = null,
-    val methodForm: WebForm? = null,
+    val syntheticBasisForm: WebForm? = null,
+    val simplexMethodForm: WebForm? = null,
     val renderedSteps: String = "",
     val syntheticSteps: List<Triple<Int, Int, Int>> = emptyList(),
-    val trueSteps: List<Triple<Int, Int, Int>> = emptyList(),
+    val simplexSteps: List<Triple<Int, Int, Int>> = emptyList(),
     val hasNextStep: Boolean = true,
     val hasPreviousStep: Boolean = false,
 ) : ViewModel {
     val syntheticStepsJs: String
         get() = renderStepsJs(syntheticSteps)
 
-    val trueStepsJs: String
-        get() = renderStepsJs(trueSteps)
+    val simplexStepsJs: String
+        get() = renderStepsJs(simplexSteps)
 
     fun renderStepsJs(steps: List<Triple<Int, Int, Int>>): String {
         var res = ""

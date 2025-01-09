@@ -4,8 +4,7 @@ import ru.yarsu.domain.entities.Fraction
 import ru.yarsu.domain.entities.Function
 import ru.yarsu.domain.entities.Matrix
 import ru.yarsu.domain.entities.TaskType
-import ru.yarsu.domain.simplex.GaussMethod.reverseRunning
-import ru.yarsu.domain.simplex.GaussMethod.straightRunning
+import ru.yarsu.domain.simplex.GaussMethod.solveGauss
 
 class SimplexTable(
     val matrix: Matrix,
@@ -30,7 +29,7 @@ class SimplexTable(
         val newBasis = newVariablesIndices.slice(0..<matrix.m)
         val newFree = newVariablesIndices.slice(matrix.m..<matrix.n - 1)
         // приведение матрицы к диагональному виду в новом базисе (шаг симплекс метода)
-        val newMatrix = matrix.inBasis(newBasis, newFree).straightRunning().reverseRunning()
+        val newMatrix = matrix.solveGauss(withBasis = newBasis, withFree = newFree)
 
         return SimplexTable(
             matrix = newMatrix,
@@ -45,7 +44,7 @@ class SimplexTable(
      * @return список координат возможных опорных элементов
      */
     fun possibleReplaces(): List<Pair<Int, Int>> {
-        val functionInBasis = function.inBasisOf(matrix, taskType)
+        val functionInBasis = function.inBasisOf(matrix = matrix, taskType = taskType)
         val possibleReplaces = mutableListOf<Pair<Int, Int>>()
         matrix.free.filter { idx ->
             functionInBasis.coefficients[idx] < 0
@@ -81,24 +80,23 @@ class SimplexTable(
      *
      * @return пара (s, r) - индексы вводимой "натуральной" переменной и выводимой искусственной переменной
      */
-    private fun idleRunningReplaces(): List<Pair<Int, Int>>? {
-        val functionInBasis = function.inBasisOf(matrix, taskType)
-
-        val possibleS = matrix.free.filter { functionInBasis.coefficients[it] == Fraction.from(0) }
-
-        for (s in possibleS) {
+    fun possibleIdleRunningReplaces(syntheticVariables: List<Int>): List<Pair<Int, Int>> {
+        val possibleReplaces = mutableListOf<Pair<Int, Int>>()
+        matrix.free.filter { idx ->
+            idx !in syntheticVariables
+        }.forEach { s ->
             val sIdx = matrix.fullIndices.indexOf(s)
-            for (r in matrix.basis) {
+            syntheticVariables.filter { it in matrix.basis }.forEach { r ->
                 val rIdx = matrix.fullIndices.indexOf(r)
                 if (matrix.coefficients[rIdx][sIdx] != Fraction.from(0) &&
-                    matrix.coefficients[rIdx][matrix.bIdx] == Fraction.from(0)
+                    matrix.coefficients[rIdx].last() == Fraction.from(0)
                 ) {
-                    return listOf(Pair(s, r))
+                    possibleReplaces.add(Pair(s, r))
                 }
             }
         }
 
-        return null
+        return possibleReplaces
     }
 
     override fun toString(): String {

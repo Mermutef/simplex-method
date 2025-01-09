@@ -178,7 +178,8 @@ async function prepareData(sendData = true) {
 	prepareMatrix();
 	prepareFunction();
 	if (sendData) {
-		document.getElementById("currentTaskJson").value = "";
+		document.getElementById("simplexMethodJson").value = "";
+		document.getElementById("syntheticBasisJson").value = "";
 		document.getElementById("send-task").click();
 	}
 }

@@ -37,7 +37,8 @@ class LoadFromFileHandler(
         val jsonFromForm = (fileField from form).content
         val serializedTask = mapper.readValue<SerializedTask>(jsonFromForm)
         val metadataForm: WebForm
-        val methodForm: WebForm
+        val simplexForm: WebForm?
+        val syntheticBasisForm: WebForm?
         when (serializedTask.method) {
             Method.SIMPLEX_METHOD -> {
                 val deserializedTask = mapper.readValue<SimplexMethod>(serializedTask.jsonContent)
@@ -45,12 +46,13 @@ class LoadFromFileHandler(
                     WebForm().with(
                         matrixField of deserializedTask.matrix.coefficients,
                         functionField of deserializedTask.function.coefficients,
-                        basisField of deserializedTask.matrix.basis,
-                        freeField of deserializedTask.matrix.free,
+                        basisField of deserializedTask.startBasis,
+                        freeField of (0..<deserializedTask.matrix.n).filter { it !in deserializedTask.startBasis },
                         methodField of Method.SIMPLEX_METHOD,
                         taskTypeField of deserializedTask.taskType,
                     )
-                methodForm = WebForm().with(simplexMethodField of deserializedTask)
+                simplexForm = WebForm().with(simplexMethodField of deserializedTask)
+                syntheticBasisForm = null
             }
 
             Method.SYNTHETIC_BASIS -> {
@@ -64,14 +66,16 @@ class LoadFromFileHandler(
                         methodField of Method.SYNTHETIC_BASIS,
                         taskTypeField of deserializedTask.taskType,
                     )
-                methodForm = WebForm().with(syntheticBasisMethodField of deserializedTask)
+                syntheticBasisForm = WebForm().with(syntheticBasisMethodField of deserializedTask)
+                simplexForm = null
             }
         }
 
         return render(request) draw
             HomePageVM(
                 metadataForm = metadataForm,
-                methodForm = methodForm,
+                syntheticBasisForm = syntheticBasisForm,
+                simplexMethodForm = simplexForm,
             )
     }
 }

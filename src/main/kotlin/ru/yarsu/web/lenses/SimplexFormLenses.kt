@@ -122,7 +122,7 @@ object SimplexFormLenses {
                         ?: throw IllegalArgumentException()
                 },
                 { toForm: SimplexMethod? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
-            ).optional("currentTaskJson")
+            ).optional("simplexMethodJson")
 
     val syntheticBasisMethodField =
         FormField
@@ -134,7 +134,7 @@ object SimplexFormLenses {
                         ?: throw IllegalArgumentException()
                 },
                 { toForm: SyntheticBasisMethod? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
-            ).optional("currentTaskJson")
+            ).optional("syntheticBasisJson")
 
     val modeField = FormField.optional("stepByStep")
 

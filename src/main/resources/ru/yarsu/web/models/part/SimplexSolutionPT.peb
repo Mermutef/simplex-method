@@ -1,7 +1,7 @@
 {# @pebvariable name="model" type="ru.yarsu.web.models.part.SimplexSolutionPT" #}
 <div class="row mt-3">
     <div class="col">
-        <h4>Ответ</h4>
+        <h4>Результат симплекс-метода</h4>
         {% if model.hasSolution %}
             <p><b>f<sup>*</sup></b> = {{ model.functionValue }}</p>
             <p><b>x<sup>*</sup></b> = {{ model.vertex }}</p>

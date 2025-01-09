@@ -10,7 +10,10 @@ import org.http4k.lens.WebForm
 import ru.yarsu.domain.entities.Fraction
 import ru.yarsu.domain.entities.Function
 import ru.yarsu.domain.entities.Matrix
+import ru.yarsu.domain.simplex.Method
+import ru.yarsu.domain.simplex.SimplexBase
 import ru.yarsu.domain.simplex.SimplexMethod
+import ru.yarsu.domain.simplex.SyntheticBasisMethod
 import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.draw
 import ru.yarsu.web.lenses.SimplexFormLenses.basisField
@@ -21,11 +24,13 @@ import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
 import ru.yarsu.web.lenses.SimplexFormLenses.methodField
 import ru.yarsu.web.lenses.SimplexFormLenses.modeField
 import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodField
+import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.taskMetadataForm
 import ru.yarsu.web.lenses.SimplexFormLenses.taskTypeField
 import ru.yarsu.web.models.common.HomePageVM
 import ru.yarsu.web.models.part.SimplexSolutionPT
 import ru.yarsu.web.models.part.SimplexStepPT
+import ru.yarsu.web.models.part.SyntheticBasisSolutionPT
 
 class AutoSolveHandler(
     private val render: ContextAwareViewRender,
@@ -54,23 +59,87 @@ class AutoSolveHandler(
                 free = defaultFree,
             )
         val function = Function(coefficients = functionCoefficients)
+        var renderedSteps = ""
+        var syntheticSteps: List<Triple<Int, Int, Int>> = emptyList()
+        var simplexSteps: List<Triple<Int, Int, Int>> = emptyList()
+        var simplexMethodTask: SimplexMethod? = null
+        var syntheticBasisTask: SyntheticBasisMethod? = null
 
-        val currentTask =
-            SimplexMethod(
-                matrix = matrix,
-                function = function,
-                startBasis = basis,
-                taskType = taskType,
-            )
+        if (method == Method.SYNTHETIC_BASIS) {
+            syntheticBasisTask =
+                SyntheticBasisMethod(
+                    matrix = matrix,
+                    function = function,
+                    taskType = taskType,
+                )
+            if (modeField from taskMetadataForm == null) {
+                syntheticBasisTask.solve()
+            }
 
-        if (modeField from taskMetadataForm == null) {
-            currentTask.solve()
+            val solution =
+                syntheticBasisTask.renderSteps(
+                    request = request,
+                    forSyntheticBasis = true,
+                )
+            renderedSteps = solution.first + syntheticBasisTask.renderSolution(method = method, request = request)
+            syntheticSteps = solution.second
+
+            simplexMethodTask = syntheticBasisTask.getSimplexMethodBySolution()
+        } else {
+            simplexMethodTask =
+                SimplexMethod(
+                    matrix = matrix,
+                    function = function,
+                    startBasis = basis,
+                    taskType = taskType,
+                )
+        }
+        simplexMethodTask?.let {
+            if (modeField from taskMetadataForm == null) {
+                simplexMethodTask.solve()
+            }
+            val solution = simplexMethodTask.renderSteps(request)
+            renderedSteps += solution.first +
+                simplexMethodTask.renderSolution(
+                    method = Method.SIMPLEX_METHOD,
+                    request = request,
+                )
+            simplexSteps = solution.second
         }
 
-        var renderedSteps = ""
-        val trueSteps = mutableListOf<Triple<Int, Int, Int>>()
+        return render(request) draw
+            HomePageVM(
+                metadataForm =
+                    taskMetadataForm
+                        .with(freeField of defaultFree)
+                        .let {
+                            if (method == Method.SYNTHETIC_BASIS) {
+                                it.minus("basisJson")
+                                    .with(basisField of defaultBasis)
+                            } else {
+                                it
+                            }
+                        },
+                simplexMethodForm =
+                    simplexMethodTask?.let {
+                        WebForm().with(simplexMethodField of it)
+                    },
+                syntheticBasisForm = syntheticBasisTask?.let { WebForm().with(syntheticBasisMethodField of it) },
+                renderedSteps = renderedSteps,
+                syntheticSteps = syntheticSteps,
+                simplexSteps = simplexSteps,
+                hasPreviousStep = false,
+                hasNextStep = false,
+            )
+    }
 
-        currentTask.stepsTables.forEachIndexed { i, simplexTable ->
+    private fun SimplexBase.renderSteps(
+        request: Request,
+        forSyntheticBasis: Boolean = false,
+    ): Pair<String, List<Triple<Int, Int, Int>>> {
+        var renderedSteps = ""
+        val methodSteps = mutableListOf<Triple<Int, Int, Int>>()
+        stepsTables.forEachIndexed { i, simplexTable ->
             val webForm =
                 WebForm().with(
                     basisField of simplexTable.matrix.basis,
@@ -89,55 +158,66 @@ class AutoSolveHandler(
                         SimplexStepPT(
                             stepIdx = i,
                             stepForm = webForm,
+                            isSyntheticBasisStep = forSyntheticBasis,
                         )
                 ).body
-            trueSteps.add(
-                if (i != currentTask.stepsTables.lastIndex) {
-                    Triple(i, currentTask.stepsReplaces[i]!!.first, currentTask.stepsReplaces[i]!!.second)
+            methodSteps.add(
+                if (i != stepsTables.lastIndex) {
+                    Triple(i, stepsReplaces[i]!!.first, stepsReplaces[i]!!.second)
                 } else {
                     Triple(i, -1, -1)
                 },
             )
         }
+        return Pair(renderedSteps, methodSteps)
+    }
 
-        renderedSteps +=
-            (
-                render(request) draw
-                    when (val solution = currentTask.getSolution()) {
-                        is Success ->
-                            SimplexSolutionPT(
-                                vertex = solution.value.first,
-                                functionValue = solution.value.second,
-                            )
+    private fun SimplexBase.renderSolution(
+        method: Method,
+        request: Request,
+    ): String {
+        return when (method) {
+            Method.SIMPLEX_METHOD -> {
+                (
+                    render(request) draw
+                        when (val solution = getSolution()) {
+                            is Success ->
+                                SimplexSolutionPT(
+                                    vertex = solution.value.first,
+                                    functionValue = solution.value.second,
+                                )
 
-                        is Failure ->
-                            SimplexSolutionPT(
-                                hasSolution = false,
-                                cause = solution.reason.text,
-                                functionValue = Fraction(0, 1),
-                                vertex = emptyList(),
-                            )
-                    }
-            ).body
+                            is Failure ->
+                                SimplexSolutionPT(
+                                    hasSolution = false,
+                                    cause = solution.reason.text,
+                                    functionValue = Fraction(0, 1),
+                                    vertex = emptyList(),
+                                )
+                        }
+                ).bodyString()
+            }
 
-        return render(request) draw
-            HomePageVM(
-                metadataForm =
-                    taskMetadataForm
-                        .with(freeField of defaultFree),
-//                            .let {
-//                                if (method == Method.SYNTHETIC_BASIS) {
-//                                    it.minus("basisJson").with(basisField of defaultBasis)
-//                                } else {
-//                                    it
-//                                }
-//                            },
-                methodForm = WebForm().with(simplexMethodField of currentTask),
-                renderedSteps = renderedSteps,
-                syntheticSteps = listOf(),
-                trueSteps = trueSteps,
-                hasPreviousStep = false,
-                hasNextStep = false,
-            )
+            Method.SYNTHETIC_BASIS -> {
+                (
+                    render(request) draw
+                        when (val solution = getSolution(1)) {
+                            is Success ->
+                                SyntheticBasisSolutionPT(
+                                    simplexBasis = solution.value.first,
+                                    unnecessaryConstraints = solution.value.second,
+                                )
+
+                            is Failure ->
+                                SyntheticBasisSolutionPT(
+                                    hasSolution = false,
+                                    cause = solution.reason.text,
+                                    simplexBasis = emptyList(),
+                                    unnecessaryConstraints = emptyList(),
+                                )
+                        }
+                ).bodyString()
+            }
+        }
     }
 }

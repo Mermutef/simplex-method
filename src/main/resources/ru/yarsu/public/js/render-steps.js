@@ -5,7 +5,7 @@ function loadStepData() {
 	console.log(syntheticSteps.map((elem) => elem.r));
 	console.log(syntheticSteps.map((elem) => elem.s));
 	for (let i = 0; i < syntheticSteps.length; ++i) {
-		if (i > 0) {
+		if (i > 0 && i < syntheticSteps.length - 1) {
 			loadStepMatrix(
 				syntheticSteps[i].idx,
 				syntheticSteps[i].s,
@@ -15,12 +15,7 @@ function loadStepData() {
 					.map((elem) => elem.r)
 					.filter(
 						(elem) =>
-							!(
-								elem in
-								syntheticSteps
-									.slice(0, i + 1)
-									.map((elem) => elem.s)
-							)
+							!(elem in syntheticSteps.map((elem) => elem.s))
 					),
 				"synthetic-"
 			);
@@ -33,13 +28,23 @@ function loadStepData() {
 					.map((elem) => elem.r)
 					.filter(
 						(elem) =>
-							!(
-								elem in
-								syntheticSteps
-									.slice(0, i + 1)
-									.map((elem) => elem.s)
-							)
+							!(elem in syntheticSteps.map((elem) => elem.s))
 					),
+				"synthetic-"
+			);
+		} else if (i == syntheticSteps.length - 1) {
+			loadStepMatrix(
+				syntheticSteps[i].idx,
+				syntheticSteps[i].s,
+				syntheticSteps[i].r,
+				[],
+				"synthetic-"
+			);
+			loadStepFunction(
+				syntheticSteps[i].idx,
+				syntheticSteps[i].s,
+				syntheticSteps[i].r,
+				[],
 				"synthetic-"
 			);
 		} else {
@@ -59,18 +64,18 @@ function loadStepData() {
 			);
 		}
 	}
-	for (let i = 0; i < trueSteps.length; ++i) {
+	for (let i = 0; i < simplexSteps.length; ++i) {
 		loadStepMatrix(
-			trueSteps[i].idx,
-			trueSteps[i].s,
-			trueSteps[i].r,
+			simplexSteps[i].idx,
+			simplexSteps[i].s,
+			simplexSteps[i].r,
 			[],
 			""
 		);
 		loadStepFunction(
-			trueSteps[i].idx,
-			trueSteps[i].s,
-			trueSteps[i].r,
+			simplexSteps[i].idx,
+			simplexSteps[i].s,
+			simplexSteps[i].r,
 			[],
 			""
 		);
@@ -101,7 +106,11 @@ function loadStepMatrix(currentStepId, s, r, prevRs, prefix = "") {
 		}
 		newRow.append(basisIdx);
 		for (let j = 0; j < free.length; ++j) {
-			if (trueIndices.includes(free[j]) || !prevRs.includes(free[j])) {
+			if (
+				trueIndices.includes(free[j]) ||
+				prevRs.includes(free[j]) ||
+				prefix == ""
+			) {
 				let newCell = createCell(
 					cellTemplateDisabled,
 					matrixIndices[i][indices.indexOf(free[j])]
@@ -141,7 +150,11 @@ function loadStepMatrix(currentStepId, s, r, prevRs, prefix = "") {
 	newColumnHeaderMatrix.innerHTML = `x<sup>(${currentStepId})</sup>`;
 	matrixHeader.append(newColumnHeaderMatrix);
 	for (let i = 0; i < free.length; ++i) {
-		if (trueIndices.includes(free[i]) || !prevRs.includes(free[i])) {
+		if (
+			trueIndices.includes(free[i]) ||
+			prevRs.includes(free[i]) ||
+			prefix == ""
+		) {
 			let newColumnHeaderMatrix = document.createElement("th");
 			newColumnHeaderMatrix.setAttribute("scope", "col");
 			newColumnHeaderMatrix.innerHTML = `x<sub>${free[i] + 1}</sub>`;
@@ -180,7 +193,11 @@ function loadStepFunction(currentStepId, s, r, prevRs, prefix = "") {
 		console.log(prevRs.includes(free[i]));
 		console.log(trueIndices);
 		console.log(prevRs);
-		if (trueIndices.includes(free[i]) || !prevRs.includes(free[i])) {
+		if (
+			trueIndices.includes(free[i]) ||
+			prevRs.includes(free[i]) ||
+			prefix == ""
+		) {
 			let newCell = createCell(
 				cellTemplateDisabled,
 				functionIndices[free[i]]

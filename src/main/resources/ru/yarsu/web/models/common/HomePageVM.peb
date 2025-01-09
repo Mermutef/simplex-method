@@ -250,8 +250,10 @@
                               hidden="hidden">{{ model.getMetadataForm.fields["basisJson"].first() }}</textarea>
                     <textarea name="freeJson" id="freeJson"
                               hidden="hidden">{{ model.getMetadataForm.fields["freeJson"].first() }}</textarea>
-                    <textarea name="currentTaskJson" id="currentTaskJson"
-                              hidden="hidden">{{ model.methodForm.fields["currentTaskJson"].first() }}</textarea>
+                    <textarea name="simplexMethodJson" id="simplexMethodJson"
+                              hidden="hidden">{{ model.simplexMethodForm.fields["simplexMethodJson"].first() }}</textarea>
+                    <textarea name="syntheticBasisJson" id="syntheticBasisJson"
+                              hidden="hidden">{{ model.syntheticBasisForm.fields["syntheticBasisJson"].first() }}</textarea>
                     <button class="btn btn-outline-primary underline mt-2"
                             onclick="prepareData();"
                             type="button">Вычислить
@@ -275,6 +277,6 @@
 </form>
 <script>
     var syntheticSteps = {{ model.syntheticStepsJs }};
-    var trueSteps = {{ model.trueStepsJs }};
+    var simplexSteps = {{ model.getSimplexStepsJs }};
 </script>
 {% endblock %}
