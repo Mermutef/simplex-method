@@ -112,6 +112,18 @@ object SimplexFormLenses {
                 { toForm -> jmapper.writeValueAsString(toForm) },
             ).optional("freeJson")
 
+    val replaceIndicesField =
+        FormField
+            .nonBlankString()
+            .nonEmptyString()
+            .map(
+                { fromForm ->
+                    fromForm.split(":").mapNotNull { it.toIntOrNull() }.takeIf { it.size == 2 }
+                        ?.let { Pair(it[0], it[1]) } ?: throw IllegalArgumentException()
+                },
+                { toForm: Pair<Int, Int> -> "${toForm.first}:${toForm.second}" }
+            ).optional("replace-pair")
+
     val simplexMethodField =
         FormField
             .nonBlankString()
@@ -147,19 +159,20 @@ object SimplexFormLenses {
             functionField,
             basisField,
             modeField,
+            replaceIndicesField,
         ).toLens()
 
     val simplexMethodForm =
         Body.webForm(
             Validator.Feedback,
             simplexMethodField,
-        )
+        ).toLens()
 
     val syntheticBasisMethodForm =
         Body.webForm(
             Validator.Feedback,
             syntheticBasisMethodField,
-        )
+        ).toLens()
 
     val fileField = MultipartFormFile.required("file")
 

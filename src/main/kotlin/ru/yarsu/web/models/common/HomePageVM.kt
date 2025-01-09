@@ -10,8 +10,7 @@ class HomePageVM(
     val renderedSteps: String = "",
     val syntheticSteps: List<Triple<Int, Int, Int>> = emptyList(),
     val simplexSteps: List<Triple<Int, Int, Int>> = emptyList(),
-    val hasNextStep: Boolean = true,
-    val hasPreviousStep: Boolean = false,
+    val nextStepForm: String = "",
 ) : ViewModel {
     val syntheticStepsJs: String
         get() = renderStepsJs(syntheticSteps)

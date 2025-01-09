@@ -10,6 +10,14 @@ function updateVariablesState() {
     }
 }
 
+function stepByStepChoosing() {
+    if (document.getElementById("stepByStep").checked) {
+        document.getElementById("taskForm").setAttribute("action", "/step-by-step");
+    } else {
+        document.getElementById("taskForm").setAttribute("action", "/");
+    }
+}
+
 function createCell(template, newCellValue = 0) {
     let newCell = document.createElement("td");
     newCell.innerHTML = template;
@@ -342,7 +350,14 @@ async function saveToFile() {
         );
 }
 
+function processSelection(direction) {
+    document.getElementById('taskForm').setAttribute('action', `/${direction}`);
+    prepareData(false);
+    document.getElementById("send-task").click();
+}
+
 loadData();
 addListeners();
 updateBasisIndices();
 updateVariablesState();
+stepByStepChoosing();

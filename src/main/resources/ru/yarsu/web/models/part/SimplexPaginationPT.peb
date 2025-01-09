@@ -1,0 +1,37 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.part.SimplexPaginationPT" #}
+<div id="pagination" class="text-center">
+    <div id="variablesContainer">
+        <label>Доступные замены</label>
+        <div id="possible-replaces">
+            {% for possiblePair in model.possibleReplaces %}
+                <div class="form-check form-check-inline p-0 m-1">
+                    <input type="radio"
+                           class="btn-check"
+                           name="replace-pair"
+                           id="replace-pair-{{ loop.index }}"
+                           autocomplete="off"
+                           value="{{ possiblePair.first }}:{{ possiblePair.second }}"
+                    >
+                    <label class="btn btn-outline-primary underline"
+                           for="replace-pair-{{ loop.index }}"
+                    >x<sub>{{ possiblePair.second + 1}}</sub> ⬌ x<sub>{{ possiblePair.first + 1 }}</sub>
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% if model.hasPreviousStep %}
+        <button type="button"
+                class="btn btn-outline-primary underline mt-2"
+                onclick="processSelection('previous');">
+            Назад
+        </button>
+    {% endif %}
+    {% if model.hasNextStep %}
+        <button type="button"
+                class="btn btn-outline-primary underline mt-2"
+                onclick="processSelection('next');">
+            Вперед
+        </button>
+    {% endif %}
+</div>

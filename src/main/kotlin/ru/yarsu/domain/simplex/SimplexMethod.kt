@@ -25,7 +25,9 @@ class SimplexMethod(
                 "Должно быть ровно столько же, сколько строк в матрице ограничений. " +
                 "(передано ${startBasis.size}, ожидалось ${matrix.m})."
         }
-        stepsTables.add(startTable)
+        if (stepsTables.isEmpty()) {
+            stepsTables.add(startTable)
+        }
     }
 
     @get:JsonIgnore
@@ -41,7 +43,7 @@ class SimplexMethod(
 
     override fun nextStep(inOutVariables: Pair<Int, Int>?): Result<Boolean, SimplexError> {
         val possibleReplaces = stepsTables.last().possibleReplaces()
-        if (possibleReplaces.isEmpty()) return Success(false)
+        if (possibleReplaces.isEmpty()) return Failure(SimplexError.EMPTY_POSSIBLE_REPLACES)
 
         val replace = inOutVariables ?: possibleReplaces.first()
         if (replace !in possibleReplaces) return Failure(SimplexError.INVALID_REPLACE)

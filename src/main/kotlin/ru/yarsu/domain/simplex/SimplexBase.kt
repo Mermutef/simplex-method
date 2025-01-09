@@ -40,4 +40,5 @@ enum class SimplexError(val text: String) {
     INCOMPATIBLE_CONSTRAINTS_SYSTEM("Задача не имеет решения (система ограничений несовместна)."),
     IRREPLACEABLE_SYNTHETIC_VARIABLES_IN_BASIS("Задача не имеет решения (невозможно вывести искусственную переменную из базиса)."),
     IT_IS_NOT_GOOD("Пошло не туда, чини программу."),
+    EMPTY_POSSIBLE_REPLACES("Доступных замен больше нет"),
 }

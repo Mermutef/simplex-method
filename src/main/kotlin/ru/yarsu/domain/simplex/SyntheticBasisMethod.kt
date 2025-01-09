@@ -20,7 +20,9 @@ class SyntheticBasisMethod(
     override val startBasis: List<Int> = emptyList(),
 ) : SimplexBase {
     init {
-        stepsTables.add(startTable)
+        if (stepsTables.isEmpty()) {
+            stepsTables.add(startTable)
+        }
     }
 
     /**
@@ -76,8 +78,8 @@ class SyntheticBasisMethod(
         }
 
     override fun nextStep(inOutVariables: Pair<Int, Int>?): Result<Boolean, SimplexError> {
-        val possibleReplaces = stepsTables.last().possibleReplaces()
-        if (possibleReplaces.isEmpty()) return Success(false)
+        val possibleReplaces = stepsTables.last().possibleReplaces() + stepsTables.last().possibleIdleRunningReplaces(syntheticBasis)
+        if (possibleReplaces.isEmpty()) return Failure(SimplexError.EMPTY_POSSIBLE_REPLACES)
 
         val replace = inOutVariables ?: possibleReplaces.first()
         if (replace !in possibleReplaces) return Failure(SimplexError.INVALID_REPLACE)

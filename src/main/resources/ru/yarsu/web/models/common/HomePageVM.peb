@@ -111,22 +111,9 @@
                         {% if model.renderedSteps is not empty %}
                             <h1>Решение</h1>
                             {{ model.renderedSteps | raw }}
-                            <div id="pagination" class="text-center">
-                            {% if model.hasPreviousStep %}
-                                <button type="button"
-                                        class="btn btn-outline-primary underline mt-2"
-                                        onclick="document.getElementById('taskForm').setAttribute('action', '/previous'); prepareData();">
-                                    Назад
-                                </button>
-                            {% endif %}
-                            {% if model.hasNextStep %}
-                                <button type="button"
-                                        class="btn btn-outline-primary underline mt-2"
-                                        onclick="document.getElementById('taskForm').setAttribute('action', '/next'); prepareData();">
-                                    Вперед
-                                </button>
-                            {% endif %}
-                            </div>
+                        {% endif %}
+                        {% if model.nextStepForm is not empty %}
+                            {{ model.nextStepForm | raw }}
                         {% endif %}
                     </div>
                 </div>
@@ -233,6 +220,7 @@
                                type="checkbox"
                                name="stepByStep"
                                id="stepByStep"
+                               onchange="stepByStepChoosing();"
                             {% if model.getMetadataForm.fields["stepByStep"].first() == "on" %}
                             {{ "checked" }}
                             {% endif %}
@@ -256,7 +244,8 @@
                               hidden="hidden">{{ model.syntheticBasisForm.fields["syntheticBasisJson"].first() }}</textarea>
                     <button class="btn btn-outline-primary underline mt-2"
                             onclick="prepareData();"
-                            type="button">Вычислить
+                            type="button">
+                        Вычислить
                     </button>
                     <button hidden type="submit" id="send-task">Пасхалочка</button>
                 </div>
