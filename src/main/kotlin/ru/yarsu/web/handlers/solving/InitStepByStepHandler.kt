@@ -18,13 +18,11 @@ import ru.yarsu.web.lenses.SimplexFormLenses.from
 import ru.yarsu.web.lenses.SimplexFormLenses.functionField
 import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
 import ru.yarsu.web.lenses.SimplexFormLenses.methodField
-import ru.yarsu.web.lenses.SimplexFormLenses.modeField
 import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.taskMetadataForm
 import ru.yarsu.web.lenses.SimplexFormLenses.taskTypeField
 import ru.yarsu.web.models.common.HomePageVM
-import ru.yarsu.web.notFound
 
 class InitStepByStepHandler(
     private val render: ContextAwareViewRender,
@@ -93,31 +91,32 @@ class InitStepByStepHandler(
         }
 
         return render(request) draw
-                HomePageVM(
-                    metadataForm =
-                        taskMetadataForm
-                            .with(freeField of defaultFree)
-                            .let {
-                                if (method == Method.SYNTHETIC_BASIS) {
-                                    it.minus("basisJson")
-                                        .with(basisField of defaultBasis)
-                                } else {
-                                    it
-                                }
-                            },
-                    simplexMethodForm =
-                        simplexMethodTask?.let {
-                            WebForm().with(simplexMethodField of it)
+            HomePageVM(
+                metadataForm =
+                    taskMetadataForm
+                        .with(freeField of defaultFree)
+                        .let {
+                            if (method == Method.SYNTHETIC_BASIS) {
+                                it.minus("basisJson").with(basisField of defaultBasis)
+                            } else {
+                                it
+                            }
                         },
-                    syntheticBasisForm = syntheticBasisTask?.let { WebForm().with(syntheticBasisMethodField of it) },
-                    renderedSteps = renderedSteps,
-                    syntheticSteps = syntheticSteps,
-                    simplexSteps = simplexSteps,
-                    nextStepForm = simplexMethodTask?.renderPossibleReplaces(
+                simplexMethodForm = simplexMethodTask?.let { WebForm().with(simplexMethodField of it) },
+                syntheticBasisForm = syntheticBasisTask?.let { WebForm().with(syntheticBasisMethodField of it) },
+                renderedSteps = renderedSteps,
+                syntheticSteps = syntheticSteps,
+                simplexSteps = simplexSteps,
+                nextStepForm =
+                    simplexMethodTask?.renderPossibleReplaces(
                         render = render,
                         request = request,
-                        method = method
-                    ) ?: ""
-                )
+                        method = Method.SIMPLEX_METHOD,
+                    ) ?: syntheticBasisTask?.renderPossibleReplaces(
+                        render = render,
+                        request = request,
+                        method = Method.SYNTHETIC_BASIS,
+                    ) ?: "",
+            )
     }
 }

@@ -1,7 +1,9 @@
 {# @pebvariable name="model" type="ru.yarsu.web.models.part.SimplexPaginationPT" #}
 <div id="pagination" class="text-center">
-    <div id="variablesContainer">
-        <label>Доступные замены</label>
+    <div id="possible-replaces-container">
+        {% if model.possibleReplaces is not empty %}
+            <label>Доступные замены</label>
+        {% endif %}
         <div id="possible-replaces">
             {% for possiblePair in model.possibleReplaces %}
                 <div class="form-check form-check-inline p-0 m-1">
@@ -20,18 +22,22 @@
             {% endfor %}
         </div>
     </div>
-    {% if model.hasPreviousStep %}
         <button type="button"
                 class="btn btn-outline-primary underline mt-2"
-                onclick="processSelection('previous');">
+                onclick="processSelection('previous');"
+                {% if not model.hasPreviousStep %}
+                    disabled
+                {% endif %}
+        >
             Назад
         </button>
-    {% endif %}
-    {% if model.hasNextStep %}
         <button type="button"
                 class="btn btn-outline-primary underline mt-2"
-                onclick="processSelection('next');">
+                onclick="processSelection('next');"
+            {% if not model.hasNextStep %}
+                disabled
+            {% endif %}
+        >
             Вперед
         </button>
-    {% endif %}
 </div>

@@ -29,7 +29,7 @@
         <form method="post" action="/" id="taskForm">
             <div class="row">
                 <div class="col">
-                    <div class="row mt-3">
+                    <div class="row">
                         <div class="col">
                             <h4>Коэффициенты функции</h4>
                             <table id="function" class="table table-bordered table-sm text-center align-middle">
@@ -107,7 +107,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="solution">
+                    <div class="mt-4" id="solution">
                         {% if model.renderedSteps is not empty %}
                             <h1>Решение</h1>
                             {{ model.renderedSteps | raw }}

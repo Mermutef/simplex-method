@@ -8,6 +8,7 @@ function updateVariablesState() {
     } else {
         document.getElementById("variablesContainer").removeAttribute("hidden");
     }
+    console.log(document.getElementById("method").value === "synthetic-basis")
 }
 
 function stepByStepChoosing() {
@@ -356,8 +357,10 @@ function processSelection(direction) {
     document.getElementById("send-task").click();
 }
 
-loadData();
-addListeners();
-updateBasisIndices();
-updateVariablesState();
-stepByStepChoosing();
+window.addEventListener('load', function () {
+    loadData();
+    addListeners();
+    updateBasisIndices();
+    updateVariablesState();
+    stepByStepChoosing();
+})

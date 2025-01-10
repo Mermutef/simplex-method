@@ -121,7 +121,7 @@ object SimplexFormLenses {
                     fromForm.split(":").mapNotNull { it.toIntOrNull() }.takeIf { it.size == 2 }
                         ?.let { Pair(it[0], it[1]) } ?: throw IllegalArgumentException()
                 },
-                { toForm: Pair<Int, Int> -> "${toForm.first}:${toForm.second}" }
+                { toForm: Pair<Int, Int> -> "${toForm.first}:${toForm.second}" },
             ).optional("replace-pair")
 
     val simplexMethodField =

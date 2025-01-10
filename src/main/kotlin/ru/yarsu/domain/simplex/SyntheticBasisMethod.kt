@@ -90,11 +90,11 @@ class SyntheticBasisMethod(
         return Success(true)
     }
 
-    override fun previousStep(): Result<Boolean, SimplexError> {
-        if (stepsReplaces.isEmpty()) return Success(false)
+    override fun previousStep(): Boolean {
+        if (stepsReplaces.isEmpty()) return false
         stepsReplaces.remove(stepsReplaces.size - 1)
         stepsTables.removeLast()
-        return Success(true)
+        return true
     }
 
     override fun solve() {

@@ -77,10 +77,11 @@ class AutoSolveHandler(
                         render = render,
                     )
                 renderedSteps =
-                    solution.first + syntheticBasisTask.renderSolution(
+                    solution.first +
+                    syntheticBasisTask.renderSolution(
                         method = method,
                         request = request,
-                        render = render
+                        render = render,
                     )
                 syntheticSteps = solution.second
 
@@ -98,36 +99,36 @@ class AutoSolveHandler(
                 simplexMethodTask.solve()
                 val solution = simplexMethodTask.renderSteps(request = request, render = render)
                 renderedSteps += solution.first +
-                        simplexMethodTask.renderSolution(
-                            method = Method.SIMPLEX_METHOD,
-                            request = request,
-                            render = render,
-                        )
+                    simplexMethodTask.renderSolution(
+                        method = Method.SIMPLEX_METHOD,
+                        request = request,
+                        render = render,
+                    )
                 simplexSteps = solution.second
             }
 
             return render(request) draw
-                    HomePageVM(
-                        metadataForm =
-                            taskMetadataForm
-                                .with(freeField of defaultFree)
-                                .let {
-                                    if (method == Method.SYNTHETIC_BASIS) {
-                                        it.minus("basisJson")
-                                            .with(basisField of defaultBasis)
-                                    } else {
-                                        it
-                                    }
-                                },
-                        simplexMethodForm =
-                            simplexMethodTask?.let {
-                                WebForm().with(simplexMethodField of it)
+                HomePageVM(
+                    metadataForm =
+                        taskMetadataForm
+                            .with(freeField of defaultFree)
+                            .let {
+                                if (method == Method.SYNTHETIC_BASIS) {
+                                    it.minus("basisJson")
+                                        .with(basisField of defaultBasis)
+                                } else {
+                                    it
+                                }
                             },
-                        syntheticBasisForm = syntheticBasisTask?.let { WebForm().with(syntheticBasisMethodField of it) },
-                        renderedSteps = renderedSteps,
-                        syntheticSteps = syntheticSteps,
-                        simplexSteps = simplexSteps,
-                    )
+                    simplexMethodForm =
+                        simplexMethodTask?.let {
+                            WebForm().with(simplexMethodField of it)
+                        },
+                    syntheticBasisForm = syntheticBasisTask?.let { WebForm().with(syntheticBasisMethodField of it) },
+                    renderedSteps = renderedSteps,
+                    syntheticSteps = syntheticSteps,
+                    simplexSteps = simplexSteps,
+                )
         }
         return notFound()
     }

@@ -20,7 +20,7 @@ interface SimplexBase {
 
     fun nextStep(inOutVariables: Pair<Int, Int>? = null): Result<Boolean, SimplexError>
 
-    fun previousStep(): Result<Boolean, SimplexError>
+    fun previousStep(): Boolean
 
     fun solve()
 

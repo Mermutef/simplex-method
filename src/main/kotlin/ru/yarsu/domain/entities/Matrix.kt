@@ -132,7 +132,7 @@ data class Matrix(
     }
 
     override fun toString(): String {
-        val maxColLength = coefficients.flatten().maxBy { it.toString().length }.toString().length
+        val maxColLength = coefficients.flatten().maxBy { it.toString().length }.toString().length + 2
         return (
             listOf(
                 fullIndices.map { basisIdx -> if (basisIdx + 1 != n) "x${basisIdx + 1}" else "b" },
