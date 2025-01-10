@@ -3,6 +3,7 @@ package ru.yarsu.domain.entities
 import java.math.BigInteger
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.pow
 
 @Suppress("detekt:TooManyFunctions")
 class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> {
@@ -26,7 +27,8 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
         operator fun Int.times(other: Fraction): Fraction = from(this) * other
 
         /**
-         * Приведение строки к дроби. Строка должна иметь вид [-]a/b, где a и b - целые числа
+         * Приведение строки к дроби. Строка должна иметь вид '[-]a/b',
+         * или '[-]a.b', или '[-]a,b', где a и b - целые числа.
          *
          * @return дробь
          *
@@ -34,6 +36,7 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
          * не удовлетворяет описанному формату
          */
         fun String.toFraction(): Fraction {
+            this.trim().replace(",", ".").toDoubleOrNull()?.toFraction()?.let { return it }
             val values =
                 this
                     .split("/")
@@ -49,6 +52,21 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
                 1 -> from(values[0])
                 else -> Fraction(values[0], values[1])
             }
+        }
+
+        /**
+         * Приведение десятичного числа к дроби.
+         *
+         * @return дробь
+         */
+        fun Double.toFraction(): Fraction {
+            if (this == 0.0) {
+                return from(0)
+            }
+            val values = this.toString().split(",", ".")
+            val numerator = "${values[0]}${values[1]}".toInt()
+            val denominator = 10.0.pow(values[1].length).toInt()
+            return Fraction(numerator, denominator).shorten()
         }
 
         /**
@@ -180,7 +198,7 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
     private fun sign(): Int =
         when {
             this.numerator * this.denominator > 0 ||
-                this.numerator * this.denominator < 0 ->
+                    this.numerator * this.denominator < 0 ->
                 min(this.numerator, this.denominator) / abs(min(this.numerator, this.denominator))
 
             else -> 0

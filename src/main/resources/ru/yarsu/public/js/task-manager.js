@@ -333,7 +333,7 @@ function addListeners() {
 }
 
 async function saveToFile() {
-    await prepareData();
+    await prepareData(false);
     let form = document.getElementById("taskForm");
     let data = new URLSearchParams(new FormData(form));
     fetch("/save-to-file", {

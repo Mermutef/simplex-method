@@ -33,7 +33,7 @@ object SimplexFormLenses {
             .map(
                 { fromForm: String -> Method.valueOf(fromForm.uppercase().replace("-", "_")) },
                 { toForm: Method -> toForm.toString().lowercase().replace("_", "-") },
-            ).required("method")
+            ).required("method", "Необходимо выбрать один из доступных методов решения задачи.")
 
     val taskTypeField =
         FormField
@@ -42,7 +42,7 @@ object SimplexFormLenses {
             .map(
                 { fromForm: String -> TaskType.valueOf(fromForm.uppercase().replace("-", "_")) },
                 { toForm: TaskType -> toForm.toString().lowercase().replace("_", "-") },
-            ).required("task-type")
+            ).required("task-type", "Необходимо выбрать тип задачи")
 
     val matrixField =
         FormField
@@ -54,7 +54,7 @@ object SimplexFormLenses {
                         jmapper.readValue<Array<Array<String>>>(fromForm).map {
                             it.map { aij -> aij.toFraction() }.toTypedArray()
                         }.toTypedArray()
-                    }.getOrElse { throw IllegalArgumentException("") }
+                    }.getOrElse { throw IllegalArgumentException() }
                 },
                 { toForm ->
                     jmapper.writeValueAsString(
@@ -63,7 +63,10 @@ object SimplexFormLenses {
                         },
                     )
                 },
-            ).required("matrixJson")
+            ).required(
+                "matrixJson",
+                "Матрица должна быть прямоугольной, коэффициенты матрицы могут быть простыми или десятичными дробями или целыми числами."
+            )
 
     val functionField =
         FormField
@@ -84,7 +87,10 @@ object SimplexFormLenses {
                         },
                     )
                 },
-            ).required("functionJson")
+            ).required(
+                "functionJson",
+                "Коэффициенты функции могут быть простыми или десятичными дробями или целыми числами."
+            )
 
     val basisField =
         FormField
@@ -97,7 +103,7 @@ object SimplexFormLenses {
                     }.getOrElse { throw IllegalArgumentException("") }
                 },
                 { toForm -> jmapper.writeValueAsString(toForm) },
-            ).required("basisJson")
+            ).required("basisJson", "Индексы базисных переменных могут быть только целыми числами.")
 
     val freeField =
         FormField
@@ -110,7 +116,7 @@ object SimplexFormLenses {
                     }.getOrElse { throw IllegalArgumentException("") }
                 },
                 { toForm -> jmapper.writeValueAsString(toForm) },
-            ).optional("freeJson")
+            ).optional("freeJson", "Индексы свободных переменных могут быть только целыми числами.")
 
     val replaceIndicesField =
         FormField
@@ -122,7 +128,7 @@ object SimplexFormLenses {
                         ?.let { Pair(it[0], it[1]) } ?: throw IllegalArgumentException()
                 },
                 { toForm: Pair<Int, Int> -> "${toForm.first}:${toForm.second}" },
-            ).optional("replace-pair")
+            ).optional("replace-pair", "Индексы замещения должны быть записаны в виде пары чисел.")
 
     val simplexMethodField =
         FormField
@@ -148,7 +154,14 @@ object SimplexFormLenses {
                 { toForm: SyntheticBasisMethod? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
             ).optional("syntheticBasisJson")
 
-    val modeField = FormField.optional("stepByStep")
+    val playModeField = FormField.map(
+        { fromForm: String -> fromForm == "on" },
+        { toForm: Boolean -> if (toForm) "on" else "" }
+    ).optional("stepByStep")
+    val useFractionsField = FormField.map(
+        { fromForm: String -> fromForm == "on" },
+        { toForm: Boolean -> if (toForm) "on" else "" }
+    ).optional("in-fractions")
 
     val taskMetadataForm =
         Body.webForm(
@@ -158,8 +171,9 @@ object SimplexFormLenses {
             matrixField,
             functionField,
             basisField,
-            modeField,
+            playModeField,
             replaceIndicesField,
+            useFractionsField,
         ).toLens()
 
     val simplexMethodForm =
@@ -199,3 +213,9 @@ object SimplexFormLenses {
 fun String.isBlankOrEmpty() = this.isBlank() || this.isEmpty()
 
 fun String.isNotBlankOrEmpty() = this.isNotBlank() && this.isNotEmpty()
+
+enum class FormErrorType {
+    FUNCTION,
+    MATRIX,
+    BASIS,
+}

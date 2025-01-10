@@ -32,6 +32,9 @@
                     <div class="row">
                         <div class="col">
                             <h4>Коэффициенты функции</h4>
+                            {% for error in model.functionErrors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
                             <table id="function" class="table table-bordered table-sm text-center align-middle">
                                 <thead>
                                 <tr id="function-header">
@@ -53,6 +56,9 @@
                                 </tbody>
                             </table>
                             <h4>Матрица ограничений Ax=b</h4>
+                            {% for error in model.matrixErrors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
                             <table id="matrix" class="table table-bordered table-sm text-center align-middle">
                                 <thead>
                                 <tr id="matrix-header"> <!--свободные переменные-->
@@ -112,6 +118,11 @@
                             <h1>Решение</h1>
                             {{ model.renderedSteps | raw }}
                         {% endif %}
+                        {% for error in model.metadataForm.errors %}
+                            {% if error.meta.name == "replace-pair" %}
+                                <p class="text-danger">{{ error.meta.description }}</p>
+                            {% endif %}
+                        {% endfor %}
                         {% if model.nextStepForm is not empty %}
                             {{ model.nextStepForm | raw }}
                         {% endif %}
@@ -120,18 +131,23 @@
                 <div class="col-3">
                     <div class="col mb-3">
                         <label for="task-type">Тип задачи:</label>
+                        {% for error in model.metadataForm.errors %}
+                            {% if error.meta.name == "task-type" %}
+                                <p class="text-danger">{{ error.meta.description }}</p>
+                            {% endif %}
+                        {% endfor %}
                         <select name="task-type" id="task-type" class="form-control">
                             <option value="min"
                                 {% if model.getMetadataForm.fields["task-type"].first() == "min" %}
                                     selected
                                 {% endif %}
-                            >минимум
+                            >минимизировать
                             </option>
                             <option value="max"
                                 {% if model.getMetadataForm.fields["task-type"].first() == "max" %}
                                     selected
                                 {% endif %}
-                            >максимум
+                            >максимизировать
                             </option>
                         </select>
                     </div>
@@ -139,6 +155,11 @@
                         <label for="method">
                             Метод:
                         </label>
+                        {% for error in model.metadataForm.errors %}
+                            {% if error.meta.name == "method" %}
+                                <p class="text-danger">{{ error.meta.description }}</p>
+                            {% endif %}
+                        {% endfor %}
                         <select name="method" id="method" class="form-control" onchange="updateVariablesState();">
                             <option value="simplex-method"
                                 {% if model.getMetadataForm.fields["method"].first() == "simplex-method" %}
@@ -156,6 +177,9 @@
                     </div>
                     <div id="variablesContainer">
                         <label>Индексы базисных переменных</label>
+                        {% for error in model.basisErrors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                         <div id="basis-indices">
                             <div class="form-check form-check-inline p-0 m-1">
                                 <input type="checkbox"
@@ -228,6 +252,20 @@
                         <label class="form-check-label"
                                for="stepByStep"
                         >Пошаговое решение
+                        </label>
+                    </div>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="in-fractions"
+                               id="in-fractions"
+                            {% if model.getMetadataForm.fields["in-fractions"].first() == "on" %}
+                            {{ "checked" }}
+                            {% endif %}
+                        >
+                        <label class="form-check-label"
+                               for="in-fractions"
+                        >В обыкновенных дробях
                         </label>
                     </div>
                     <textarea name="matrixJson" id="matrixJson"

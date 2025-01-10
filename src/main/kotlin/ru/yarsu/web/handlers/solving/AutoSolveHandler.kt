@@ -18,7 +18,7 @@ import ru.yarsu.web.lenses.SimplexFormLenses.from
 import ru.yarsu.web.lenses.SimplexFormLenses.functionField
 import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
 import ru.yarsu.web.lenses.SimplexFormLenses.methodField
-import ru.yarsu.web.lenses.SimplexFormLenses.modeField
+import ru.yarsu.web.lenses.SimplexFormLenses.playModeField
 import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.taskMetadataForm
@@ -35,7 +35,7 @@ class AutoSolveHandler(
             println(taskMetadataForm.errors)
             return render(request) draw HomePageVM(metadataForm = taskMetadataForm)
         }
-        if (modeField from taskMetadataForm == null) {
+        if (playModeField from taskMetadataForm == null) {
             val basis = basisField from taskMetadataForm
             val matrixCoefficients = matrixField from taskMetadataForm
             val functionCoefficients = functionField from taskMetadataForm

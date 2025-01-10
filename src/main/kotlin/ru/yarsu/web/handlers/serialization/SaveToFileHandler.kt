@@ -14,10 +14,12 @@ import ru.yarsu.domain.simplex.SyntheticBasisMethod
 import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.draw
 import ru.yarsu.web.lenses.SimplexFormLenses.basisField
+import ru.yarsu.web.lenses.SimplexFormLenses.useFractionsField
 import ru.yarsu.web.lenses.SimplexFormLenses.from
 import ru.yarsu.web.lenses.SimplexFormLenses.functionField
 import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
 import ru.yarsu.web.lenses.SimplexFormLenses.methodField
+import ru.yarsu.web.lenses.SimplexFormLenses.playModeField
 import ru.yarsu.web.lenses.SimplexFormLenses.taskMetadataForm
 import ru.yarsu.web.lenses.SimplexFormLenses.taskTypeField
 import ru.yarsu.web.models.common.HomePageVM
@@ -34,6 +36,8 @@ class SaveToFileHandler(
             return render(request) draw HomePageVM(metadataForm = form)
         }
         val method = methodField from form
+        val playMode = (playModeField from form) ?: false
+        val inFractions = (useFractionsField from form) ?: false
         val matrixCoefficients = matrixField from form
         val functionCoefficients = functionField from form
         val taskType = taskTypeField from form
@@ -55,6 +59,8 @@ class SaveToFileHandler(
             mapper.writeValueAsBytes(
                 SerializedTask(
                     method = method,
+                    playMode = playMode,
+                    useFractions = inFractions,
                     jsonContent =
                         mapper.writeValueAsString(
                             when (method) {
