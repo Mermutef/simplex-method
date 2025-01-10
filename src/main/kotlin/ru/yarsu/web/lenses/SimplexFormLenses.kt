@@ -252,7 +252,7 @@ fun WebForm.validate(): Result<ValidatedFormData, Map<FormErrorType, List<String
     val method = methodField from this
     val n = matrixCoefficients.first().size
     val m = matrixCoefficients.size
-    if (basis.size != m) {
+    if (basis.size != m && method == Method.SIMPLEX_METHOD) {
         errors[FormErrorType.BASIS]!!.add(
             "Число базисных переменных должно быть равно числу строк (передано ${basis.size}, ожидалось $m).",
         )

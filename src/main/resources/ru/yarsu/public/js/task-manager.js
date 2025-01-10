@@ -26,7 +26,7 @@ function createCell(template, newCellValue = 0) {
     if (document.getElementById("in-fractions").checked) {
         newCell.getElementsByTagName("input")[0].value = newCellValue + "";
     } else {
-        let num = Array.from(newCellValue.split("/")).map((elem) => Number(elem));
+        let num = Array.from((newCellValue + "").split("/")).map((elem) => Number(elem));
         if (num.length === 2) {
             newCell.getElementsByTagName("input")[0].value = num[0] / num[1] + "";
         } else {
