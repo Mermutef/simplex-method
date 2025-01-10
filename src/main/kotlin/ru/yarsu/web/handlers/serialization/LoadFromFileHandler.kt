@@ -9,7 +9,6 @@ import org.http4k.core.with
 import org.http4k.lens.WebForm
 import ru.yarsu.domain.entities.SerializedTask
 import ru.yarsu.domain.simplex.Method
-import ru.yarsu.domain.simplex.SimplexBase
 import ru.yarsu.domain.simplex.SimplexMethod
 import ru.yarsu.domain.simplex.SyntheticBasisMethod
 import ru.yarsu.web.context.templates.ContextAwareViewRender
@@ -42,18 +41,20 @@ class LoadFromFileHandler(
         val metadataForm: WebForm
         val simplexForm: WebForm?
         val syntheticBasisForm: WebForm?
-        val basisDeserializedTask = when (serializedTask.method) {
-            Method.SYNTHETIC_BASIS -> mapper.readValue<SyntheticBasisMethod>(serializedTask.jsonContent)
-            Method.SIMPLEX_METHOD -> mapper.readValue<SimplexMethod>(serializedTask.jsonContent)
-        }
-        val basicMetadataForm = WebForm().with(
-            matrixField of basisDeserializedTask.matrix.coefficients,
-            functionField of basisDeserializedTask.function.coefficients,
-            methodField of serializedTask.method,
-            taskTypeField of basisDeserializedTask.taskType,
-            playModeField of serializedTask.playMode,
-            useFractionsField of serializedTask.useFractions,
-        )
+        val basisDeserializedTask =
+            when (serializedTask.method) {
+                Method.SYNTHETIC_BASIS -> mapper.readValue<SyntheticBasisMethod>(serializedTask.jsonContent)
+                Method.SIMPLEX_METHOD -> mapper.readValue<SimplexMethod>(serializedTask.jsonContent)
+            }
+        val basicMetadataForm =
+            WebForm().with(
+                matrixField of basisDeserializedTask.matrix.coefficients,
+                functionField of basisDeserializedTask.function.coefficients,
+                methodField of serializedTask.method,
+                taskTypeField of basisDeserializedTask.taskType,
+                playModeField of serializedTask.playMode,
+                useFractionsField of serializedTask.useFractions,
+            )
         when (serializedTask.method) {
             Method.SIMPLEX_METHOD -> {
                 val deserializedTask = basisDeserializedTask as SimplexMethod
@@ -79,10 +80,10 @@ class LoadFromFileHandler(
         }
 
         return render(request) draw
-                HomePageVM(
-                    metadataForm = metadataForm,
-                    syntheticBasisForm = syntheticBasisForm,
-                    simplexMethodForm = simplexForm,
-                )
+            HomePageVM(
+                metadataForm = metadataForm,
+                syntheticBasisForm = syntheticBasisForm,
+                simplexMethodForm = simplexForm,
+            )
     }
 }

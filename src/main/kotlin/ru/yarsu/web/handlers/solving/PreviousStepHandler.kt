@@ -2,27 +2,23 @@ package ru.yarsu.web.handlers.solving
 
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Success
+import dev.forkhandles.result4k.valueOrNull
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
-import org.http4k.core.with
-import org.http4k.lens.WebForm
 import ru.yarsu.domain.simplex.Method
 import ru.yarsu.domain.simplex.SimplexMethod
 import ru.yarsu.domain.simplex.SyntheticBasisMethod
 import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.draw
-import ru.yarsu.web.lenses.SimplexFormLenses.basisField
-import ru.yarsu.web.lenses.SimplexFormLenses.freeField
 import ru.yarsu.web.lenses.SimplexFormLenses.from
 import ru.yarsu.web.lenses.SimplexFormLenses.lensOrNull
-import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
-import ru.yarsu.web.lenses.SimplexFormLenses.methodField
 import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodForm
 import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodForm
 import ru.yarsu.web.lenses.SimplexFormLenses.taskMetadataForm
+import ru.yarsu.web.lenses.validate
 import ru.yarsu.web.models.common.HomePageVM
 import ru.yarsu.web.notFound
 
@@ -30,17 +26,16 @@ class PreviousStepHandler(
     private val render: ContextAwareViewRender,
 ) : HttpHandler {
     override fun invoke(request: Request): Response {
-        val taskMetadataForm = taskMetadataForm from request
-        if (taskMetadataForm.errors.isNotEmpty()) {
-            println(taskMetadataForm.errors)
-            return render(request) draw HomePageVM(metadataForm = taskMetadataForm)
+        val metadataForm = taskMetadataForm from request
+        val metadataFormValidationResult = metadataForm.validate()
+        if (metadataFormValidationResult is Failure) {
+            return render(request) draw
+                HomePageVM(
+                    metadataForm = metadataForm,
+                    errors = metadataFormValidationResult.reason,
+                )
         }
-        val matrixCoefficients = matrixField from taskMetadataForm
-        val method = methodField from taskMetadataForm
-        val n = matrixCoefficients.first().size
-        val m = matrixCoefficients.size
-        val defaultBasis = (0..<m).toList()
-        val defaultFree = (m..<n - 1).toList()
+        val validatedForm = metadataFormValidationResult.valueOrNull()!!
 
         var renderedSteps = ""
 
@@ -50,7 +45,7 @@ class PreviousStepHandler(
         var simplexMethodTask: SimplexMethod? = null
         var syntheticBasisTask: SyntheticBasisMethod? = null
 
-        if (method == Method.SYNTHETIC_BASIS) {
+        if (validatedForm.method == Method.SYNTHETIC_BASIS) {
             syntheticBasisTask = lensOrNull(syntheticBasisMethodField, (syntheticBasisMethodForm from request))
                 ?: return notFound()
 
@@ -63,17 +58,12 @@ class PreviousStepHandler(
                         simplexMethodTask = simplexFromRequest
                         if (simplexMethodTask.stepsReplaces.isNotEmpty()) {
                             simplexMethodTask.previousStep()
-                            if (simplexMethodTask.stepsReplaces.isNotEmpty()) {
-                                renderedSolution =
-                                    syntheticBasisTask.renderSolution(
-                                        method = method,
-                                        request = request,
-                                        render = render,
-                                    )
-                            } else {
-                                simplexMethodTask = null
-                                syntheticBasisTask.previousStep()
-                            }
+                            renderedSolution =
+                                syntheticBasisTask.renderSolution(
+                                    method = validatedForm.method,
+                                    request = request,
+                                    render = render,
+                                )
                         } else {
                             simplexMethodTask = null
                             syntheticBasisTask.previousStep()
@@ -115,32 +105,16 @@ class PreviousStepHandler(
             simplexSteps = solution.second
         }
         return render(request) draw
-            HomePageVM(
-                metadataForm =
-                    taskMetadataForm
-                        .with(freeField of defaultFree)
-                        .let {
-                            if (method == Method.SYNTHETIC_BASIS) {
-                                it.minus("basisJson").with(basisField of defaultBasis)
-                            } else {
-                                it
-                            }
-                        },
-                simplexMethodForm = simplexMethodTask?.let { WebForm().with(simplexMethodField of it) },
-                syntheticBasisForm = syntheticBasisTask?.let { WebForm().with(syntheticBasisMethodField of it) },
+            render.taskHomePageFilledBy(
+                request = request,
+                metadataForm = metadataForm,
+                validatedForm = validatedForm,
+                simplexMethod = simplexMethodTask,
+                syntheticBasisMethod = syntheticBasisTask,
                 renderedSteps = renderedSteps,
                 syntheticSteps = syntheticSteps,
                 simplexSteps = simplexSteps,
-                nextStepForm =
-                    simplexMethodTask?.renderPossibleReplaces(
-                        render = render,
-                        request = request,
-                        method = Method.SIMPLEX_METHOD,
-                    ) ?: syntheticBasisTask?.renderPossibleReplaces(
-                        render = render,
-                        request = request,
-                        method = Method.SYNTHETIC_BASIS,
-                    ) ?: "",
+                solve = false,
             )
     }
 }

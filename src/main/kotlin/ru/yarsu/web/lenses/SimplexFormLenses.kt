@@ -2,6 +2,9 @@
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import dev.forkhandles.result4k.Failure
+import dev.forkhandles.result4k.Result
+import dev.forkhandles.result4k.Success
 import org.http4k.core.Body
 import org.http4k.core.Request
 import org.http4k.lens.BiDiBodyLens
@@ -18,10 +21,18 @@ import org.http4k.lens.nonBlankString
 import org.http4k.lens.nonEmptyString
 import org.http4k.lens.webForm
 import ru.yarsu.domain.entities.Fraction.Companion.toFraction
+import ru.yarsu.domain.entities.Function
+import ru.yarsu.domain.entities.Matrix
 import ru.yarsu.domain.entities.TaskType
 import ru.yarsu.domain.simplex.Method
 import ru.yarsu.domain.simplex.SimplexMethod
 import ru.yarsu.domain.simplex.SyntheticBasisMethod
+import ru.yarsu.web.lenses.SimplexFormLenses.basisField
+import ru.yarsu.web.lenses.SimplexFormLenses.from
+import ru.yarsu.web.lenses.SimplexFormLenses.functionField
+import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
+import ru.yarsu.web.lenses.SimplexFormLenses.methodField
+import ru.yarsu.web.lenses.SimplexFormLenses.taskTypeField
 
 private val jmapper = jacksonObjectMapper()
 
@@ -65,7 +76,7 @@ object SimplexFormLenses {
                 },
             ).required(
                 "matrixJson",
-                "Матрица должна быть прямоугольной, коэффициенты матрицы могут быть простыми или десятичными дробями или целыми числами."
+                "Матрица должна быть прямоугольной, коэффициенты матрицы должны быть простыми или десятичными дробями или целыми числами.",
             )
 
     val functionField =
@@ -89,7 +100,7 @@ object SimplexFormLenses {
                 },
             ).required(
                 "functionJson",
-                "Коэффициенты функции могут быть простыми или десятичными дробями или целыми числами."
+                "Коэффициенты функции должны быть простыми или десятичными дробями или целыми числами.",
             )
 
     val basisField =
@@ -154,14 +165,16 @@ object SimplexFormLenses {
                 { toForm: SyntheticBasisMethod? -> toForm?.let { jmapper.writeValueAsString(it) } ?: "" },
             ).optional("syntheticBasisJson")
 
-    val playModeField = FormField.map(
-        { fromForm: String -> fromForm == "on" },
-        { toForm: Boolean -> if (toForm) "on" else "" }
-    ).optional("stepByStep")
-    val useFractionsField = FormField.map(
-        { fromForm: String -> fromForm == "on" },
-        { toForm: Boolean -> if (toForm) "on" else "" }
-    ).optional("in-fractions")
+    val playModeField =
+        FormField.map(
+            { fromForm: String -> fromForm == "on" },
+            { toForm: Boolean -> if (toForm) "on" else "" },
+        ).optional("stepByStep")
+    val useFractionsField =
+        FormField.map(
+            { fromForm: String -> fromForm == "on" },
+            { toForm: Boolean -> if (toForm) "on" else "" },
+        ).optional("in-fractions")
 
     val taskMetadataForm =
         Body.webForm(
@@ -213,6 +226,72 @@ object SimplexFormLenses {
 fun String.isBlankOrEmpty() = this.isBlank() || this.isEmpty()
 
 fun String.isNotBlankOrEmpty() = this.isNotBlank() && this.isNotEmpty()
+
+fun WebForm.validate(): Result<ValidatedFormData, Map<FormErrorType, List<String>>> {
+    val errors =
+        mapOf(
+            Pair(FormErrorType.FUNCTION, mutableListOf<String>()),
+            Pair(FormErrorType.MATRIX, mutableListOf()),
+            Pair(FormErrorType.BASIS, mutableListOf()),
+        )
+    if (this.errors.isNotEmpty()) {
+        this.errors.forEach { error ->
+            when (error.meta.name) {
+                "functionJson" -> errors[FormErrorType.FUNCTION]!!.add(error.meta.description.toString())
+                "matrixJson" -> errors[FormErrorType.MATRIX]!!.add(error.meta.description.toString())
+                "basisJson" -> errors[FormErrorType.BASIS]!!.add(error.meta.description.toString())
+            }
+        }
+        return Failure(errors)
+    }
+
+    val basis = basisField from this
+    val matrixCoefficients = matrixField from this
+    val functionCoefficients = functionField from this
+    val taskType = taskTypeField from this
+    val method = methodField from this
+    val n = matrixCoefficients.first().size
+    val m = matrixCoefficients.size
+    if (basis.size != m) {
+        errors[FormErrorType.BASIS]!!.add(
+            "Число базисных переменных должно быть равно числу строк (передано ${basis.size}, ожидалось $m).",
+        )
+        return Failure(errors)
+    }
+    val defaultBasis = (0..<m).toList()
+    val defaultFree = (m..<n - 1).toList()
+    val matrix =
+        runCatching {
+            Matrix(
+                m = m,
+                n = n,
+                coefficients = matrixCoefficients,
+                basis = defaultBasis,
+                free = defaultFree,
+            )
+        }.getOrElse {
+            errors[FormErrorType.MATRIX]!!.add(it.message ?: "")
+            return Failure(errors)
+        }
+    val function = Function(coefficients = functionCoefficients)
+    return Success(
+        ValidatedFormData(
+            method = method,
+            matrix = matrix,
+            function = function,
+            taskType = taskType,
+            startBasis = basis,
+        ),
+    )
+}
+
+class ValidatedFormData(
+    val method: Method,
+    val matrix: Matrix,
+    val function: Function,
+    val taskType: TaskType,
+    val startBasis: List<Int>,
+)
 
 enum class FormErrorType {
     FUNCTION,

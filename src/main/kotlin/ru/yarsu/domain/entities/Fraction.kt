@@ -198,7 +198,7 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
     private fun sign(): Int =
         when {
             this.numerator * this.denominator > 0 ||
-                    this.numerator * this.denominator < 0 ->
+                this.numerator * this.denominator < 0 ->
                 min(this.numerator, this.denominator) / abs(min(this.numerator, this.denominator))
 
             else -> 0

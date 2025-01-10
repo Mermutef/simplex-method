@@ -6,26 +6,21 @@ import dev.forkhandles.result4k.valueOrNull
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
-import org.http4k.core.with
-import org.http4k.lens.WebForm
 import ru.yarsu.domain.simplex.Method
 import ru.yarsu.domain.simplex.SimplexError
 import ru.yarsu.domain.simplex.SimplexMethod
 import ru.yarsu.domain.simplex.SyntheticBasisMethod
 import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.draw
-import ru.yarsu.web.lenses.SimplexFormLenses.basisField
-import ru.yarsu.web.lenses.SimplexFormLenses.freeField
 import ru.yarsu.web.lenses.SimplexFormLenses.from
 import ru.yarsu.web.lenses.SimplexFormLenses.lensOrNull
-import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
-import ru.yarsu.web.lenses.SimplexFormLenses.methodField
 import ru.yarsu.web.lenses.SimplexFormLenses.replaceIndicesField
 import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodForm
 import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodField
 import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodForm
 import ru.yarsu.web.lenses.SimplexFormLenses.taskMetadataForm
+import ru.yarsu.web.lenses.validate
 import ru.yarsu.web.models.common.HomePageVM
 import ru.yarsu.web.notFound
 
@@ -33,17 +28,16 @@ class NextStepHandler(
     private val render: ContextAwareViewRender,
 ) : HttpHandler {
     override fun invoke(request: Request): Response {
-        val taskMetadataForm = taskMetadataForm from request
-        if (taskMetadataForm.errors.isNotEmpty()) {
-            println(taskMetadataForm.errors)
-            return render(request) draw HomePageVM(metadataForm = taskMetadataForm)
+        val metadataForm = taskMetadataForm from request
+        val metadataFormValidationResult = metadataForm.validate()
+        if (metadataFormValidationResult is Failure) {
+            return render(request) draw
+                HomePageVM(
+                    metadataForm = metadataForm,
+                    errors = metadataFormValidationResult.reason,
+                )
         }
-        val matrixCoefficients = matrixField from taskMetadataForm
-        val method = methodField from taskMetadataForm
-        val n = matrixCoefficients.first().size
-        val m = matrixCoefficients.size
-        val defaultBasis = (0..<m).toList()
-        val defaultFree = (m..<n - 1).toList()
+        val validatedForm = metadataFormValidationResult.valueOrNull()!!
 
         var renderedSteps = ""
 
@@ -53,8 +47,8 @@ class NextStepHandler(
         var simplexMethodTask: SimplexMethod? = null
         var syntheticBasisTask: SyntheticBasisMethod? = null
         var doSimplex = true
-        val replaceIndices = replaceIndicesField from taskMetadataForm
-        if (method == Method.SYNTHETIC_BASIS) {
+        val replaceIndices = replaceIndicesField from metadataForm
+        if (validatedForm.method == Method.SYNTHETIC_BASIS) {
             syntheticBasisTask = lensOrNull(syntheticBasisMethodField, (syntheticBasisMethodForm from request))
                 ?: return notFound()
 
@@ -73,7 +67,7 @@ class NextStepHandler(
                     }
                     renderedSolution =
                         syntheticBasisTask.renderSolution(
-                            method = method,
+                            method = validatedForm.method,
                             request = request,
                             render = render,
                         )
@@ -87,7 +81,7 @@ class NextStepHandler(
                                 is Success -> {
                                     renderedSolution =
                                         syntheticBasisTask.renderSolution(
-                                            method = method,
+                                            method = validatedForm.method,
                                             request = request,
                                             render = render,
                                         )
@@ -108,7 +102,7 @@ class NextStepHandler(
                                         else -> {
                                             renderedSolution =
                                                 syntheticBasisTask.renderSolution(
-                                                    method = method,
+                                                    method = validatedForm.method,
                                                     request = request,
                                                     render = render,
                                                 )
@@ -122,7 +116,7 @@ class NextStepHandler(
                         else -> {
                             renderedSolution =
                                 syntheticBasisTask.renderSolution(
-                                    method = method,
+                                    method = validatedForm.method,
                                     request = request,
                                     render = render,
                                 )
@@ -208,33 +202,16 @@ class NextStepHandler(
             }
         }
         return render(request) draw
-            HomePageVM(
-                metadataForm =
-                    taskMetadataForm
-                        .with(freeField of defaultFree)
-                        .let {
-                            if (method == Method.SYNTHETIC_BASIS) {
-                                it.minus("basisJson").with(basisField of defaultBasis)
-                            } else {
-                                it
-                            }
-                        },
-                simplexMethodForm = simplexMethodTask?.let { WebForm().with(simplexMethodField of it) },
-                syntheticBasisForm = syntheticBasisTask?.let { WebForm().with(syntheticBasisMethodField of it) },
+            render.taskHomePageFilledBy(
+                request = request,
+                metadataForm = metadataForm,
+                validatedForm = validatedForm,
+                simplexMethod = simplexMethodTask,
+                syntheticBasisMethod = syntheticBasisTask,
                 renderedSteps = renderedSteps,
                 syntheticSteps = syntheticSteps,
                 simplexSteps = simplexSteps,
-                nextStepForm =
-                    simplexMethodTask?.renderPossibleReplaces(
-                        render = render,
-                        request = request,
-                        method = Method.SIMPLEX_METHOD,
-                        wasSyntheticBasis = syntheticBasisTask?.stepsReplaces?.isNotEmpty() ?: false,
-                    ) ?: syntheticBasisTask?.renderPossibleReplaces(
-                        render = render,
-                        request = request,
-                        method = Method.SYNTHETIC_BASIS,
-                    ) ?: "",
+                solve = false,
             )
     }
 }

@@ -3,11 +3,13 @@ package ru.yarsu.web.handlers.solving
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Success
 import org.http4k.core.Request
+import org.http4k.core.Response
 import org.http4k.core.with
 import org.http4k.lens.WebForm
 import ru.yarsu.domain.entities.Fraction
 import ru.yarsu.domain.simplex.Method
 import ru.yarsu.domain.simplex.SimplexBase
+import ru.yarsu.domain.simplex.SimplexMethod
 import ru.yarsu.domain.simplex.SyntheticBasisMethod
 import ru.yarsu.web.context.templates.ContextAwareViewRender
 import ru.yarsu.web.draw
@@ -15,6 +17,10 @@ import ru.yarsu.web.lenses.SimplexFormLenses.basisField
 import ru.yarsu.web.lenses.SimplexFormLenses.freeField
 import ru.yarsu.web.lenses.SimplexFormLenses.functionField
 import ru.yarsu.web.lenses.SimplexFormLenses.matrixField
+import ru.yarsu.web.lenses.SimplexFormLenses.simplexMethodField
+import ru.yarsu.web.lenses.SimplexFormLenses.syntheticBasisMethodField
+import ru.yarsu.web.lenses.ValidatedFormData
+import ru.yarsu.web.models.common.HomePageVM
 import ru.yarsu.web.models.part.SimplexPaginationPT
 import ru.yarsu.web.models.part.SimplexSolutionPT
 import ru.yarsu.web.models.part.SimplexStepPT
@@ -147,3 +153,130 @@ fun SimplexBase.renderPossibleReplaces(
         }
     }
 }
+
+fun ContextAwareViewRender.renderTaskHomePage(
+    request: Request,
+    validatedForm: ValidatedFormData,
+    metadataForm: WebForm,
+    solve: Boolean = false,
+): Response {
+    var renderedSteps = ""
+    var syntheticSteps: List<Triple<Int, Int, Int>> = emptyList()
+    var simplexSteps: List<Triple<Int, Int, Int>> = emptyList()
+    val simplexMethodTask: SimplexMethod?
+    var syntheticBasisTask: SyntheticBasisMethod? = null
+
+    if (validatedForm.method == Method.SYNTHETIC_BASIS) {
+        syntheticBasisTask =
+            SyntheticBasisMethod(
+                matrix = validatedForm.matrix,
+                function = validatedForm.function,
+                taskType = validatedForm.taskType,
+            )
+        if (solve) {
+            syntheticBasisTask.solve()
+        }
+        syntheticBasisTask.renderSteps(
+            request = request,
+            forSyntheticBasis = true,
+            render = this,
+        ).let {
+            renderedSteps = it.first
+            if (solve) {
+                renderedSteps +=
+                    syntheticBasisTask.renderSolution(
+                        method = validatedForm.method,
+                        request = request,
+                        render = this,
+                    )
+            }
+            syntheticSteps = it.second
+        }
+        simplexMethodTask = syntheticBasisTask.getSimplexMethodBySolution()
+    } else {
+        simplexMethodTask =
+            SimplexMethod(
+                matrix = validatedForm.matrix,
+                function = validatedForm.function,
+                startBasis = validatedForm.startBasis,
+                taskType = validatedForm.taskType,
+            )
+    }
+    simplexMethodTask?.let {
+        if (solve) {
+            simplexMethodTask.solve()
+        }
+        simplexMethodTask.renderSteps(request = request, render = this).let {
+            renderedSteps += it.first
+            if (solve) {
+                renderedSteps +=
+                    simplexMethodTask.renderSolution(
+                        method = Method.SIMPLEX_METHOD,
+                        request = request,
+                        render = this,
+                    )
+            }
+            simplexSteps = it.second
+        }
+    }
+
+    return this(request) draw
+        this.taskHomePageFilledBy(
+            request = request,
+            metadataForm = metadataForm,
+            validatedForm = validatedForm,
+            simplexMethod = simplexMethodTask,
+            syntheticBasisMethod = syntheticBasisTask,
+            renderedSteps = renderedSteps,
+            syntheticSteps = syntheticSteps,
+            simplexSteps = simplexSteps,
+            solve = solve,
+        )
+}
+
+fun ContextAwareViewRender.taskHomePageFilledBy(
+    request: Request,
+    metadataForm: WebForm,
+    validatedForm: ValidatedFormData,
+    simplexMethod: SimplexMethod?,
+    syntheticBasisMethod: SyntheticBasisMethod?,
+    renderedSteps: String,
+    syntheticSteps: List<Triple<Int, Int, Int>>,
+    simplexSteps: List<Triple<Int, Int, Int>>,
+    solve: Boolean,
+): HomePageVM =
+    HomePageVM(
+        metadataForm =
+            metadataForm
+                .with(freeField of validatedForm.matrix.basis)
+                .let {
+                    when (validatedForm.method) {
+                        Method.SYNTHETIC_BASIS ->
+                            it.minus("basisJson")
+                                .with(basisField of validatedForm.matrix.free)
+
+                        Method.SIMPLEX_METHOD -> it
+                    }
+                },
+        simplexMethodForm = simplexMethod?.let { WebForm().with(simplexMethodField of it) },
+        syntheticBasisForm = syntheticBasisMethod?.let { WebForm().with(syntheticBasisMethodField of it) },
+        renderedSteps = renderedSteps,
+        syntheticSteps = syntheticSteps,
+        simplexSteps = simplexSteps,
+        nextStepForm =
+            when {
+                !solve ->
+                    simplexMethod?.renderPossibleReplaces(
+                        render = this,
+                        request = request,
+                        method = Method.SIMPLEX_METHOD,
+                        wasSyntheticBasis = syntheticBasisMethod != null,
+                    ) ?: syntheticBasisMethod?.renderPossibleReplaces(
+                        render = this,
+                        request = request,
+                        method = Method.SYNTHETIC_BASIS,
+                    )
+
+                else -> null
+            } ?: "",
+    )

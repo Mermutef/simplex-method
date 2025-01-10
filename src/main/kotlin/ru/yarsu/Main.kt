@@ -10,8 +10,6 @@ import org.http4k.routing.static
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import ru.yarsu.domain.config.AppConfig
-import ru.yarsu.domain.entities.Fraction
-import ru.yarsu.domain.entities.Fraction.Companion.toFraction
 import ru.yarsu.web.context.ContextTools
 import ru.yarsu.web.filters.NotFoundFilter
 import ru.yarsu.web.handlers.HandlersContainer
