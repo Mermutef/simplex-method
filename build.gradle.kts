@@ -15,7 +15,7 @@ plugins {
     kotlin("jvm") version "2.0.0"
     application
     id("org.jlleitschuh.gradle.ktlint") version ("+")
-    id("io.gitlab.arturbosch.detekt") version ("+")
+    id("com.gradleup.shadow") version ("+")
 }
 
 repositories {
@@ -65,11 +65,6 @@ ktlint {
     }
 }
 
-detekt {
-    allRules = true
-    buildUponDefaultConfig = true
-}
-
 tasks {
     withType<KotlinCompile> {
         compilerOptions {
@@ -89,5 +84,16 @@ tasks {
 
     test {
         useJUnitPlatform()
+    }
+}
+
+tasks {
+    shadowJar {
+        manifest {
+            attributes["Main-Class"] = "Main.kt"
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            archiveBaseName = "simplex-server"
+        }
+        configurations = listOf(project.configurations["compileClasspath"])
     }
 }

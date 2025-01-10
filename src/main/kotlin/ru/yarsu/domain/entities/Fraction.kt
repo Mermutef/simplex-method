@@ -5,7 +5,6 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 
-@Suppress("detekt:TooManyFunctions")
 class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> {
     init {
         require(denominator != 0) {
@@ -13,7 +12,6 @@ class Fraction(val numerator: Int, val denominator: Int) : Comparable<Fraction> 
         }
     }
 
-    @Suppress("detekt:TooManyFunctions")
     // математические операции для работы с дробью как с обычным числом
     companion object {
         fun from(numerator: Int) = Fraction(numerator, 1)

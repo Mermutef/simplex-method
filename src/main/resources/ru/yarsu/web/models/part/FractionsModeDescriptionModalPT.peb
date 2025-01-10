@@ -1,0 +1,20 @@
+<div class="modal fade" id="fractionsModeDescriptionModal" tabindex="-1" aria-labelledby="fractionsModeDescriptionModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="fractionsModeDescriptionModal">Выбор режима отображения</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Данный переключатель позволяет выбрать, в каком формате будут отображаться вычисления.</p>
+                <p><b>Обратите внимание!</b> Все вычисления в процессе поиска решения задачи будут происходить в
+                    обыкновенных дробях, введенные целые числа и десятичные дроби будут представлены при вычислениях в
+                    виде обыкновенных.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Понятненько!</button>
+            </div>
+        </div>
+    </div>
+</div>

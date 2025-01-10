@@ -22,7 +22,7 @@
     </ul>
     {% endblock %}
     {% block title %}Сиплекс-метод{% endblock %}
-    {% block pageHeading %}Условие задачи{% endblock %}
+    {% block pageHeading %}Условие задачи<sup><a class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#taskDescriptionModal">ⓘ</a></sup>{% endblock %}
 {% block pageInner %}
 <div class="row mb-3">
     <div class="col">
@@ -31,7 +31,7 @@
                 <div class="col">
                     <div class="row">
                         <div class="col">
-                            <h4>Коэффициенты функции</h4>
+                            <h4>Коэффициенты целевой функции<sup><a class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#functionDescriptionModal">ⓘ</a></sup></h4>
                             {% for error in model.functionErrors %}
                                 <p class="text-danger">{{ error }}</p>
                             {% endfor %}
@@ -55,7 +55,7 @@
                                 </tr>
                                 </tbody>
                             </table>
-                            <h4>Матрица ограничений Ax=b</h4>
+                            <h4>Матрица ограничений Ax=b<sup><a class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#matrixDescriptionModal">ⓘ</a></sup></h4>
                             {% for error in model.matrixErrors %}
                                 <p class="text-danger">{{ error }}</p>
                             {% endfor %}
@@ -153,7 +153,7 @@
                     </div>
                     <div class="col mb-3">
                         <label for="method">
-                            Метод:
+                            Метод:<sup><a class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#methodDescriptionModal">ⓘ</a></sup>
                         </label>
                         {% for error in model.metadataForm.errors %}
                             {% if error.meta.name == "method" %}
@@ -176,7 +176,7 @@
                         </select>
                     </div>
                     <div id="variablesContainer">
-                        <label>Индексы базисных переменных</label>
+                        <label>Индексы базисных переменных<sup><a class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#basisDescriptionModal">ⓘ</a></sup></label>
                         {% for error in model.basisErrors %}
                             <p class="text-danger">{{ error }}</p>
                         {% endfor %}
@@ -251,7 +251,7 @@
                         >
                         <label class="form-check-label"
                                for="stepByStep"
-                        >Пошаговое решение
+                        >Пошаговое решение<sup><a class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#stepModeDescriptionModal">ⓘ</a></sup>
                         </label>
                     </div>
                     <div class="form-check form-switch mt-2">
@@ -265,7 +265,7 @@
                         >
                         <label class="form-check-label"
                                for="in-fractions"
-                        >В обыкновенных дробях
+                        >В обыкновенных дробях<sup><a class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#fractionsModeDescriptionModal">ⓘ</a></sup>
                         </label>
                     </div>
                     <textarea name="matrixJson" id="matrixJson"
@@ -302,6 +302,13 @@
     </div>
     <button id="send-file" type="submit"></button>
 </form>
+{% include "../part/TaskDescriptionModalPT.peb" %}
+{% include "../part/MethodDescriptionModalPT.peb" %}
+{% include "../part/BasisDescriptionModalPT.peb" %}
+{% include "../part/MatrixDescriptionModalPT.peb" %}
+{% include "../part/FunctionDescriptionModalPT.peb" %}
+{% include "../part/FractionsModeDescriptionModalPT.peb" %}
+{% include "../part/StepModeDescriptionModalPT.peb" %}
 <script>
     var syntheticSteps = {{ model.syntheticStepsJs }};
     var simplexSteps = {{ model.getSimplexStepsJs }};

@@ -113,11 +113,11 @@ data class Matrix(
         val defaultFree = (0..<n - 1).filter { it !in newBasis }
         val newCoefficients = mutableListOf<MutableList<Fraction>>()
         val coefficientsIndices = newBasis + (newFree ?: defaultFree) + listOf(bIdx)
-        coefficients.forEachIndexed { rowIdx, _ ->
+        coefficients.forEach { row ->
             val rowInAnotherBasis = mutableListOf<Fraction>()
             coefficientsIndices.forEach {
                 val t = fullIndices.indexOf(it)
-                rowInAnotherBasis.add(coefficients[rowIdx][t])
+                rowInAnotherBasis.add(row[t])
             }
             newCoefficients.add(rowInAnotherBasis)
         }

@@ -1,0 +1,19 @@
+<div class="modal fade" id="functionDescriptionModal" tabindex="-1" aria-labelledby="functionDescriptionModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="functionDescriptionModal">Коэффициенты функции</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Коэффициенты целевой функции должны быть заданы простой ([-]a/b) или десятичной ([-]a.b или
+                    [-]a,b) дробью или целым числом.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Понятненько!</button>
+            </div>
+        </div>
+    </div>
+</div>

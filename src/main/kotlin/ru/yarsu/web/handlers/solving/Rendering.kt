@@ -40,21 +40,21 @@ fun SimplexBase.renderSteps(
                 freeField of simplexTable.matrix.free,
                 matrixField of simplexTable.matrix.coefficients,
                 functionField of
-                        simplexTable.function.inBasisOf(
-                            matrix = simplexTable.matrix,
-                            taskType = taskType,
-                            invertLast = true,
-                        ).coefficients,
+                    simplexTable.function.inBasisOf(
+                        matrix = simplexTable.matrix,
+                        taskType = taskType,
+                        invertLast = true,
+                    ).coefficients,
             )
         renderedSteps +=
             (
-                    render(request) draw
-                            SimplexStepPT(
-                                stepIdx = i,
-                                stepForm = webForm,
-                                isSyntheticBasisStep = forSyntheticBasis,
-                            )
-                    ).body
+                render(request) draw
+                    SimplexStepPT(
+                        stepIdx = i,
+                        stepForm = webForm,
+                        isSyntheticBasisStep = forSyntheticBasis,
+                    )
+            ).body
         methodSteps.add(
             if (i != stepsTables.lastIndex) {
                 Triple(i, stepsReplaces[i]!!.first, stepsReplaces[i]!!.second)
@@ -74,44 +74,44 @@ fun SimplexBase.renderSolution(
     return when (method) {
         Method.SIMPLEX_METHOD -> {
             (
-                    render(request) draw
-                            when (val solution = getSolution()) {
-                                is Success ->
-                                    SimplexSolutionPT(
-                                        vertex = solution.value.first,
-                                        functionValue = solution.value.second,
-                                    )
+                render(request) draw
+                    when (val solution = getSolution()) {
+                        is Success ->
+                            SimplexSolutionPT(
+                                vertex = solution.value.first,
+                                functionValue = solution.value.second,
+                            )
 
-                                is Failure ->
-                                    SimplexSolutionPT(
-                                        hasSolution = false,
-                                        cause = solution.reason.text,
-                                        functionValue = Fraction(0, 1),
-                                        vertex = emptyList(),
-                                    )
-                            }
-                    ).bodyString()
+                        is Failure ->
+                            SimplexSolutionPT(
+                                hasSolution = false,
+                                cause = solution.reason.text,
+                                functionValue = Fraction(0, 1),
+                                vertex = emptyList(),
+                            )
+                    }
+            ).bodyString()
         }
 
         Method.SYNTHETIC_BASIS -> {
             (
-                    render(request) draw
-                            when (val solution = getSolution(1)) {
-                                is Success ->
-                                    SyntheticBasisSolutionPT(
-                                        simplexBasis = solution.value.first,
-                                        unnecessaryConstraints = solution.value.second,
-                                    )
+                render(request) draw
+                    when (val solution = getSolution(1)) {
+                        is Success ->
+                            SyntheticBasisSolutionPT(
+                                simplexBasis = solution.value.first,
+                                unnecessaryConstraints = solution.value.second,
+                            )
 
-                                is Failure ->
-                                    SyntheticBasisSolutionPT(
-                                        hasSolution = false,
-                                        cause = solution.reason.text,
-                                        simplexBasis = emptyList(),
-                                        unnecessaryConstraints = emptyList(),
-                                    )
-                            }
-                    ).bodyString()
+                        is Failure ->
+                            SyntheticBasisSolutionPT(
+                                hasSolution = false,
+                                cause = solution.reason.text,
+                                simplexBasis = emptyList(),
+                                unnecessaryConstraints = emptyList(),
+                            )
+                    }
+            ).bodyString()
         }
     }
 }
@@ -127,29 +127,31 @@ fun SimplexBase.renderPossibleReplaces(
             val lastStep = stepsTables.last()
             val possibleReplaces = lastStep.possibleReplaces()
             (
-                    render(request) draw
-                            SimplexPaginationPT(
-                                possibleReplaces = possibleReplaces,
-                                hasNextStep = possibleReplaces.isNotEmpty(),
-                                hasPreviousStep = if (wasSyntheticBasis) true else stepsReplaces.isNotEmpty(),
-                            )
-                    ).bodyString()
+                render(request) draw
+                    SimplexPaginationPT(
+                        possibleReplaces = possibleReplaces,
+                        hasNextStep = possibleReplaces.isNotEmpty(),
+                        hasPreviousStep = if (wasSyntheticBasis) true else stepsReplaces.isNotEmpty(),
+                    )
+            ).bodyString()
         }
 
         Method.SYNTHETIC_BASIS -> {
             val lastStep = stepsTables.last()
             val possibleReplaces =
-                (lastStep.possibleReplaces() +
+                (
+                    lastStep.possibleReplaces() +
                         lastStep
-                            .possibleIdleRunningReplaces((this as SyntheticBasisMethod).syntheticBasis)).distinct()
+                            .possibleIdleRunningReplaces((this as SyntheticBasisMethod).syntheticBasis)
+                ).distinct()
             (
-                    render(request) draw
-                            SimplexPaginationPT(
-                                possibleReplaces = possibleReplaces,
-                                hasNextStep = possibleReplaces.isNotEmpty(),
-                                hasPreviousStep = stepsReplaces.isNotEmpty(),
-                            )
-                    ).bodyString()
+                render(request) draw
+                    SimplexPaginationPT(
+                        possibleReplaces = possibleReplaces,
+                        hasNextStep = possibleReplaces.isNotEmpty(),
+                        hasPreviousStep = stepsReplaces.isNotEmpty(),
+                    )
+            ).bodyString()
         }
     }
 }
@@ -221,17 +223,17 @@ fun ContextAwareViewRender.renderTaskHomePage(
     }
 
     return this(request) draw
-            this.taskHomePageFilledBy(
-                request = request,
-                metadataForm = metadataForm,
-                validatedForm = validatedForm,
-                simplexMethod = simplexMethodTask,
-                syntheticBasisMethod = syntheticBasisTask,
-                renderedSteps = renderedSteps,
-                syntheticSteps = syntheticSteps,
-                simplexSteps = simplexSteps,
-                solve = solve,
-            )
+        this.taskHomePageFilledBy(
+            request = request,
+            metadataForm = metadataForm,
+            validatedForm = validatedForm,
+            simplexMethod = simplexMethodTask,
+            syntheticBasisMethod = syntheticBasisTask,
+            renderedSteps = renderedSteps,
+            syntheticSteps = syntheticSteps,
+            simplexSteps = simplexSteps,
+            solve = solve,
+        )
 }
 
 fun ContextAwareViewRender.taskHomePageFilledBy(

@@ -1,0 +1,20 @@
+<div class="modal fade" id="stepModeDescriptionModal" tabindex="-1" aria-labelledby="stepModeDescriptionModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="stepModeDescriptionModal">Пошаговый режим</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Данный переключатель позволяет выбрать, в каком формате будут производиться вычисления.</p>
+                <p>При выборе пошагового режима, на каждом шаге симплекс-метода и метода искусственного базиса будет
+                    предложен список доступных на данном этапе замен. Если не выбрать никакую из замен, система сама
+                    сделает выбор.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Понятненько!</button>
+            </div>
+        </div>
+    </div>
+</div>

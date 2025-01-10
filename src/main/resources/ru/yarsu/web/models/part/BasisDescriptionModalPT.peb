@@ -1,0 +1,19 @@
+<div class="modal fade" id="basisDescriptionModal" tabindex="-1" aria-labelledby="basisDescriptionModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="basisDescriptionModal">Базисные переменные</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Базисных переменных должно быть выбрано ровно столько, сколько в матрице ограничений строк.</p>
+                <p>Эти переменные задают базис базисного (масло-масляное, да-да) решения. В случае, если они неизвестны,
+                    стоит использовать метод искусственного базиса.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Понятненько!</button>
+            </div>
+        </div>
+    </div>
+</div>

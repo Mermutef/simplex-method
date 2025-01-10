@@ -31,7 +31,7 @@ interface SimplexBase {
     fun getSolution(a: Int = 0): Result<Pair<List<Int>, List<Int>>, SimplexError>
 }
 
-@Suppress("ktlint:standard:max-line-length", "detekt:MaxLineLength")
+@Suppress("ktlint:standard:max-line-length")
 enum class SimplexError(val text: String) {
     UNLIMITED_FUNCTION("Функция на заданном множестве неограниченна, минимизировать (максимизировать) невозможно."),
     INCORRECT_MATRIX("Некорректная симплекс-таблица. Симплекс-таблица должна иметь диагональный вид относительно базисных переменных."),

@@ -4,6 +4,7 @@ import org.http4k.lens.WebForm
 import org.http4k.template.ViewModel
 import ru.yarsu.web.lenses.FormErrorType
 
+@Suppress("LongParameterList")
 class HomePageVM(
     val metadataForm: WebForm? = null,
     val syntheticBasisForm: WebForm? = null,

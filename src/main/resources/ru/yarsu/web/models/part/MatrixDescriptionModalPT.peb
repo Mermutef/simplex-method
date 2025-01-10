@@ -1,0 +1,31 @@
+<div class="modal fade" id="matrixDescriptionModal" tabindex="-1" aria-labelledby="matrixDescriptionModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="matrixDescriptionModal">Матрица ограничений</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Условие задачи для симплекс-метода и метода искусственного базиса вводится в канонической форме
+                    записи, то есть в виде:
+                </p>
+                <p><b>f(x) &rarr; min</b> (или <b>f(x) &rarr; max</b>),</p>
+                <p><b>Ax=b</b>,</p>
+                <p><b>x &ge; 0</b>;</p>
+                <p>где <b>A</b> - матрица ограничений, m строк, n столбцов; <b>x</b> - вектор
+                    размерности n, <b>b</b> - вектор размерности m, <b>f</b> - линейная функция n переменных.</p>
+                <p>Иными словами, матрица ограничений - это система линейных алгебраических уравнений. Если ограничения
+                    заданы не в каноническом виде, существуют способы приведения системы неравенств к системе уравнений.
+                    Подробнее - на уроках математики в школе :)</p>
+                <p>
+                    Коэффициенты матрицы ограничений должны быть заданы простой ([-]a/b) или десятичной ([-]a.b или
+                    [-]a,b) дробью или целым числом.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Понятненько!</button>
+            </div>
+        </div>
+    </div>
+</div>
