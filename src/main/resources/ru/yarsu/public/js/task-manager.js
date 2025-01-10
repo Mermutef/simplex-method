@@ -23,7 +23,17 @@ function stepByStepChoosing() {
 function createCell(template, newCellValue = 0) {
     let newCell = document.createElement("td");
     newCell.innerHTML = template;
-    newCell.getElementsByTagName("input")[0].value = newCellValue + "";
+    if (document.getElementById("in-fractions").checked) {
+        newCell.getElementsByTagName("input")[0].value = newCellValue + "";
+    } else {
+        let num = Array.from(newCellValue.split("/")).map((elem) => Number(elem));
+        if (num.length === 2) {
+            newCell.getElementsByTagName("input")[0].value = num[0] / num[1] + "";
+        } else {
+            newCell.getElementsByTagName("input")[0].value = newCellValue + "";
+        }
+
+    }
     return newCell;
 }
 
@@ -53,13 +63,6 @@ function createRow(n, template) {
         newRow.append(createCell(template));
     }
     return newRow;
-}
-
-function removeFree() {
-    let freeCoefficients = Array.from(
-        document.getElementsByName("basis")
-    ).filter((elem) => !elem.checked);
-    freeCoefficients[freeCoefficients.length - 1].remove();
 }
 
 function createTh(headerId, idx, htmlText) {
