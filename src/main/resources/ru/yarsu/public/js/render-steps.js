@@ -204,6 +204,6 @@ function loadStepFunction(currentStepId, s, r, prevRs, prefix = "") {
         .append(newRow);
 }
 
-window.addEventListener('load', function () {
+window.addEventListener("load", function () {
     loadStepData();
-})
+});

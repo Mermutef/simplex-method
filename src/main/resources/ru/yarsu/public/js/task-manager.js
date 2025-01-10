@@ -8,12 +8,13 @@ function updateVariablesState() {
     } else {
         document.getElementById("variablesContainer").removeAttribute("hidden");
     }
-    console.log(document.getElementById("method").value === "synthetic-basis")
 }
 
 function stepByStepChoosing() {
     if (document.getElementById("stepByStep").checked) {
-        document.getElementById("taskForm").setAttribute("action", "/step-by-step");
+        document
+            .getElementById("taskForm")
+            .setAttribute("action", "/step-by-step");
     } else {
         document.getElementById("taskForm").setAttribute("action", "/");
     }
@@ -234,9 +235,14 @@ function getAndClearField(fieldId) {
 }
 
 function loadData() {
-    loadMatrix();
-    loadFunction();
-    loadBasisIndices();
+    try {
+        loadMatrix();
+        loadFunction();
+        loadBasisIndices();
+    } catch (e) {
+        console.log("Возможно что-то пошло не так");
+        console.log(e);
+    }
     updateVariablesState();
 }
 
@@ -300,7 +306,9 @@ function loadFunction() {
 }
 
 function updateBasisIndices(e) {
-    let m = selectMatrixRows().length;
+    let m = document
+        .getElementById("matrix-rows")
+        .getElementsByTagName("tr").length;
     let selectedBasis = Array.from(document.getElementsByName("basis")).filter(
         (elem) => elem.checked
     );
@@ -352,15 +360,15 @@ async function saveToFile() {
 }
 
 function processSelection(direction) {
-    document.getElementById('taskForm').setAttribute('action', `/${direction}`);
+    document.getElementById("taskForm").setAttribute("action", `/${direction}`);
     prepareData(false);
     document.getElementById("send-task").click();
 }
 
-window.addEventListener('load', function () {
+window.addEventListener("load", function () {
     loadData();
     addListeners();
     updateBasisIndices();
     updateVariablesState();
     stepByStepChoosing();
-})
+});
